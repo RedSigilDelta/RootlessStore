@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.baidaidai.rootless_store.application.environment.ResolveEnvironmentShareUriUseCase
 import com.baidaidai.rootless_store.application.install.InstallLocalPackageUseCase
+import com.baidaidai.rootless_store.application.install.ResolveLocalPackageMetaInfoUseCase
 import com.baidaidai.rootless_store.domain.plugin.error.PluginError
 import com.baidaidai.rootless_store.domain.environment.manifest.EnvironmentManifest
 import com.baidaidai.rootless_store.domain.environment.model.EnvironmentStatus
@@ -24,6 +25,7 @@ import com.baidaidai.rootless_store.application.plugin.ResolvePluginShareUriUseC
 import com.baidaidai.rootless_store.application.plugin.ResolvePluginWebUiUriUseCase
 import com.baidaidai.rootless_store.domain.plugin.manifest.PluginManifest
 import com.baidaidai.rootless_store.domain.plugin.model.PluginStatus
+import com.baidaidai.rootless_store.ui.uistate.RootlessStorePluginScreenUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -54,11 +56,12 @@ class RootlessStorePluginScreenViewModel @Inject constructor(
     private val resolvePluginShareUriUseCase: ResolvePluginShareUriUseCase,
     private val resolvePluginWebUiUriUseCase: ResolvePluginWebUiUriUseCase,
     private val resolveEnvironmentShareUriUseCase: ResolveEnvironmentShareUriUseCase,
+    private val resolveLocalPackageMetaInfoUseCase: ResolveLocalPackageMetaInfoUseCase,
     observePluginTotalCountUseCase: ObservePluginTotalCountUseCase
 ): ViewModel() {
 
-    private val _pendingLocalPackageUri = MutableStateFlow<Uri>(value = Uri.EMPTY)
     private val _isBadgeVisible = MutableStateFlow(false)
+    private val _pluginScreenUiState = MutableStateFlow(RootlessStorePluginScreenUiState())
 
     private val _pluginError = MutableSharedFlow<PluginError?>()
     val pluginError = _pluginError.asSharedFlow()
@@ -81,8 +84,8 @@ class RootlessStorePluginScreenViewModel @Inject constructor(
         initialValue = 0
     )
 
-    val pendingLocalPackageUri = _pendingLocalPackageUri.asStateFlow()
     val isBadgeVisible = _isBadgeVisible.asStateFlow()
+    val pluginScreenUiState = _pluginScreenUiState.asStateFlow()
 
     /**
      * 按 pluginId 单独观察某个插件的状态。
@@ -97,18 +100,57 @@ class RootlessStorePluginScreenViewModel @Inject constructor(
     fun observeEnvironmentStatus(environmentId: String): Flow<EnvironmentStatus?> =
         observeEnvironmentStatusUseCase(environmentId)
 
-    fun setPendingLocalPackageUri(packageUri: Uri){
-        _pendingLocalPackageUri.value = packageUri
+    fun prepareLocalPackageInstall(
+        packageUri: Uri
+    ) {
+        viewModelScope.launch {
+            val localPackageMetaInfo = resolveLocalPackageMetaInfoUseCase(packageUri)
+
+            if (localPackageMetaInfo == null) {
+                installLocalPackage(packageUri)
+                return@launch
+            }
+
+            _pluginScreenUiState.update { uiState ->
+                uiState.copy(
+                    localPackageUri = packageUri,
+                    localPackageMetaInfo = localPackageMetaInfo,
+                    isLocalPackageConfirmationSheetVisible = true
+                )
+            }
+        }
     }
 
-    fun installLocalPackage(){
+    fun confirmLocalPackageInstall() {
+        val packageUri = pluginScreenUiState.value.localPackageUri ?: return
+        clearLocalPackageInstallConfirmation()
+        installLocalPackage(packageUri)
+    }
+
+    fun dismissLocalPackageInstallConfirmation() {
+        clearLocalPackageInstallConfirmation()
+    }
+
+    private fun installLocalPackage(
+        packageUri: Uri
+    ){
         viewModelScope.launch {
-            val installationError = installLocalPackageUseCase(pendingLocalPackageUri.value)
+            val installationError = installLocalPackageUseCase(packageUri)
             if (installationError is PluginError){
                 _pluginError.emit(installationError)
             }else{
                 _pluginError.emit(null)
             }
+        }
+    }
+
+    private fun clearLocalPackageInstallConfirmation() {
+        _pluginScreenUiState.update { uiState ->
+            uiState.copy(
+                localPackageUri = null,
+                localPackageMetaInfo = null,
+                isLocalPackageConfirmationSheetVisible = false
+            )
         }
     }
 
