@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
@@ -47,6 +48,7 @@ import com.baidaidai.rootless_store.ui.adaptive.RootlessStoreWindowSize
 import com.baidaidai.rootless_store.ui.components.codeBrickScreen.CodeBrickScreenNecessaryComponents
 import com.baidaidai.rootless_store.ui.components.executeScreen.ExecuteScreenNecessaryComponents
 import com.baidaidai.rootless_store.ui.components.marketScreen.MarketScreenNecessaryComponents
+import com.baidaidai.rootless_store.ui.components.pluginScreen.PluginBottomSheetContent
 import com.baidaidai.rootless_store.ui.components.pluginScreen.PluginScreenNecessaryComponents
 import com.baidaidai.rootless_store.ui.components.settingScreen.SettingScreenNecessaryComponents
 import com.baidaidai.rootless_store.ui.components.shellScreen.ShellScreenNecessaryComponents
@@ -79,6 +81,7 @@ fun RootlessStoreNavigationScaffold(
     val codeBrickViewModel = hiltViewModel<RootlessStoreCodeBrickViewModel>()
     val pluginCount by pluginScreenViewModel.pluginCount.collectAsState()
     val pluginSourceCount by sourceScreenViewModel.pluginSourceCount.collectAsState()
+    val pluginScreenUiState by pluginScreenViewModel.pluginScreenUiState.collectAsState()
 
     // Navigation
     val navigationBackStack = rememberNavBackStack(HomeScreenKey)
@@ -92,8 +95,7 @@ fun RootlessStoreNavigationScaffold(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
         uri?.let {
-            pluginScreenViewModel.setPendingLocalPackageUri(uri)
-            pluginScreenViewModel.installLocalPackage()
+            pluginScreenViewModel.prepareLocalPackageInstall(uri)
         }
     }
 
@@ -161,8 +163,7 @@ fun RootlessStoreNavigationScaffold(
         val uri = incomingPackageUri ?: return@LaunchedEffect
 
         navigationBackStack.add(PluginScreenKey)
-        pluginScreenViewModel.setPendingLocalPackageUri(uri)
-        pluginScreenViewModel.installLocalPackage()
+        pluginScreenViewModel.prepareLocalPackageInstall(uri)
         onIncomingPackageConsumed()
     }
 
@@ -334,6 +335,24 @@ fun RootlessStoreNavigationScaffold(
                 )
                 .weight(1f)
         ) { contentPadding->
+
+            if (pluginScreenUiState.isLocalPackageConfirmationSheetVisible) {
+                ModalBottomSheet(
+                    onDismissRequest = {
+                        pluginScreenViewModel.dismissLocalPackageInstallConfirmation()
+                    }
+                ) {
+                    PluginBottomSheetContent(
+                        localPackageMetaInfo = pluginScreenUiState.localPackageMetaInfo!!,
+                        onDismiss = {
+                            pluginScreenViewModel.dismissLocalPackageInstallConfirmation()
+                        },
+                        onConfirm = {
+                            pluginScreenViewModel.confirmLocalPackageInstall()
+                        }
+                    )
+                }
+            }
 
             // Source Adding Dialog
             if (isSourceDialogVisible){
