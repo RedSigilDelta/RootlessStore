@@ -217,6 +217,28 @@ val surfaceContainerDarkHighContrast = Color(0xFF2B3133)
 val surfaceContainerHighDarkHighContrast = Color(0xFF363C3E)
 val surfaceContainerHighestDarkHighContrast = Color(0xFF424849)
 
+val SuccessColorSet = ColorSet(
+    lightSet = ColorBasic(
+        color = Color(0xFF477A4A),
+        onColor = Color(0xFFF2FFF0)
+    ),
+    darkSet = ColorBasic(
+        color = Color(0xFFA7D7A6),
+        onColor = Color(0xFF153B1B)
+    )
+)
+
+val WarningColorSet = ColorSet(
+    lightSet = ColorBasic(
+        color = Color(0xFF8A640F),
+        onColor = Color(0xFFFFF8E8)
+    ),
+    darkSet = ColorBasic(
+        color = Color(0xFFE9C16A),
+        onColor = Color(0xFF3D2F00)
+    )
+)
+
 
 
 

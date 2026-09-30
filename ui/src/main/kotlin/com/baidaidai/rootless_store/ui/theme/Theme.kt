@@ -248,10 +248,6 @@ data class ColorFamily(
     val onColorContainer: Color
 )
 
-val unspecifiedScheme = ColorFamily(
-    Color.Unspecified, Color.Unspecified, Color.Unspecified, Color.Unspecified
-)
-
 @Composable
 @ExperimentalMaterial3ExpressiveApi
 fun RootlessStoreTheme(
