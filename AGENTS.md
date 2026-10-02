@@ -33,7 +33,7 @@ The immediate objective is to perform a comprehensive, evidence-driven investiga
 
 The investigation program is defined by "PLAN.md".
 
-The investigation methodology is defined by "INVESTIGATION.md".
+The investigation methodology is defined by "INVESTIGATION_METHOD.md".
 
 "MasterRef.md" is the project's synthesized reference document.
 
@@ -47,30 +47,32 @@ The primary documents are:
 
 AGENTS.md
 PLAN.md
-INVESTIGATION.md
+INVESTIGATION_METHOD.md
 MasterRef.md
 ARCHITECTURE.md
+INVESTIGATION.md
 README.md
 
 Authority hierarchy
 
 Use the documents according to their purpose:
 
-Document| Authority
-"AGENTS.md"| Agent behavior and project rules
-"PLAN.md"| Investigation scope and phase order
-"INVESTIGATION.md"| Investigation methodology and evidence standards
-"ARCHITECTURE.md"| Current architectural direction
-"MasterRef.md"| Synthesized project knowledge/reference
-"README.md"| Project overview and user-facing information
+Document | Authority
+"AGENTS.md" | Agent behavior and project rules
+"PLAN.md" | Investigation scope and phase order
+"INVESTIGATION_METHOD.md" | Investigation methodology and evidence standards
+"ARCHITECTURE.md" | Current architectural direction
+"INVESTIGATION.md" | Original pre-MasterRef investigation and historical research/reference material
+"MasterRef.md" | Synthesized project knowledge/reference
+"README.md" | Project overview and user-facing information
 
 If documents conflict:
 
 1. Follow explicit safety/security rules.
 2. Follow "AGENTS.md" for agent behavior.
 3. Follow "PLAN.md" for investigation scope.
-4. Follow "INVESTIGATION.md" for research methodology.
-5. Treat "MasterRef.md" and "ARCHITECTURE.md" as knowledge to be verified when conducting research.
+4. Follow "INVESTIGATION_METHOD.md" for research methodology.
+5. Treat "MasterRef.md", "ARCHITECTURE.md", and "INVESTIGATION.md" as knowledge/reference material to be verified when conducting research.
 6. Do not silently resolve contradictions.
 
 Document the contradiction when necessary.

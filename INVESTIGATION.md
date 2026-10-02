@@ -1,1498 +1,1005 @@
-ADB Modules App — Investigation Methodology
+Investigation
 
-«Purpose: Define the methodology, evidence standards, research process, verification requirements, and reporting format used for the ADB Modules App investigation program.
+1. Purpose
 
-"PLAN.md" defines what must be investigated.
+This document records the research and findings that inform the ADB Modules project.
 
-"AGENTS.md" defines how the agent must behave.
+It answers:
 
-This document defines how an investigation must be performed, evaluated, documented, and verified.»
+- What exists in the projects being studied?
+- How do those systems currently work?
+- What behaviors and formats need to be compatible?
+- What constraints or risks were discovered?
+- What evidence supports the project's architectural decisions?
+
+This document is a research record, not the architecture specification or implementation plan.
 
 ---
 
-1. Investigation Philosophy
+2. Documentation Source of Truth
 
-The ADB Modules App follows a research-first development process.
+The project uses separate documents for separate responsibilities.
 
-The investigation process exists to establish a reliable understanding of:
+Document| Authority
+"AGENTS.md"| Agent behavior, rules, constraints, and workflow
+"ARCHITECTURE.md"| System structure, boundaries, responsibilities, and architectural invariants
+"PLAN.md"| Implementation scope, sequencing, milestones, and completion criteria
+"INVESTIGATION.md"| Research findings, external-project behavior, evidence, and compatibility observations
+"README.md"| Public-facing project explanation
 
-- existing implementations
-- external technologies
-- compatibility requirements
-- security boundaries
-- runtime behavior
-- architectural constraints
-- Android-version differences
-- failure and recovery behavior
-- ecosystem compatibility
-- future architectural possibilities
+Each document is authoritative only within its own domain.
 
-The investigation process must distinguish between:
+A finding recorded here does not automatically change the architecture or implementation plan.
 
-Evidence
+When investigation reveals that the existing architecture or plan is incorrect:
+
+1. Record the finding here.
+2. Determine whether the finding changes the architecture.
+3. If architecture changes, update "ARCHITECTURE.md".
+4. If implementation scope or ordering changes, update "PLAN.md".
+5. If agent behavior or guardrails need to change, update "AGENTS.md".
+6. Keep this document as the research record.
+
+Cross-document contradictions must never be silently resolved by choosing whichever statement is convenient.
+
+---
+
+3. Project Under Investigation
+
+The project is a unified Android application based on a fork of Rootless Store.
+
+The application is intended to support three distinct executable package families:
+
+Unified Application
+├── Rootless Plugins
+├── ADB Modules
+└── CodeBricks
+
+The project is not intended to become a copy of either Rootless Store or Shevery.
+
+The investigation therefore focuses on:
+
+- preserving useful Rootless Store functionality,
+- understanding Shevery's ADB Module compatibility requirements,
+- determining how Porter can provide the primary privileged execution path,
+- maintaining Shizuku compatibility,
+- identifying security and lifecycle requirements,
+- avoiding incompatible assumptions between the systems.
+
+---
+
+4. Rootless Store Investigation
+
+4.1 Project Role
+
+Rootless Store provides the foundation for the application.
+
+The project already contains concepts for:
+
+- plugin management,
+- plugin installation,
+- plugin execution,
+- execution contexts,
+- runtime persistence,
+- execution history,
+- CodeBricks,
+- configurable sources,
+- market/catalog functionality,
+- WebUI-capable plugins,
+- device/runtime status,
+- Shizuku-backed execution.
+
+This makes it a useful starting point rather than requiring an entirely new package-management application.
+
+Official repository:
+
+"Rootless Store repository" (https://reference-url-citation.invalid/0)
+
+---
+
+5. Rootless Store Architectural Findings
+
+The investigation identified several useful concepts in Rootless Store.
+
+These include concepts corresponding to:
+
+- "Plugin"
+- "PluginManifest"
+- "PluginSource"
+- "PluginExecution"
+- "PluginRuntime"
+- "ExecutionContext"
+- "CodeBrick"
+- market/source abstractions
+- execution gateways
+- plugin repositories
+- execution persistence
+- runtime recovery
+
+Exact source names and paths should be verified against the current fork before implementation.
+
+Where this document uses a class name that has not been freshly verified, it represents a research reference, not a mandate to preserve that exact API.
+
+---
+
+6. Rootless Plugin Findings
+
+Rootless Plugins have their own package format and lifecycle.
+
+Important characteristics include:
+
+- plugin metadata,
+- configured entry points,
+- executable files,
+- one-shot execution,
+- daemon-style execution,
+- environment configuration,
+- execution contexts,
+- installation and extraction,
+- execution persistence,
+- process management,
+- optional WebUI behavior.
+
+Rootless Plugin semantics must remain distinct from ADB Module semantics.
+
+The ADB Module compatibility layer should therefore not redefine Rootless Plugin metadata to accommodate Shevery.
+
+---
+
+7. Rootless Execution Findings
+
+Rootless Store contains execution mechanisms supporting different privilege environments.
+
+The investigated execution concepts include:
+
+Application / Local Shell
+        │
+        ├── restricted execution
+        │
+        ├── Shizuku / ADB execution
+        │
+        └── Root execution
+
+The exact current implementation must be verified before reuse.
+
+A key finding is that Rootless Store already separates executable package management from some of the mechanics used to execute packages.
+
+This provides useful precedent for a separate execution abstraction.
+
+---
+
+8. Rootless Shizuku Findings
+
+Rootless Store uses Shizuku-related services for privileged operations.
+
+The investigation identified concepts involving:
+
+- Shizuku UserService,
+- AIDL communication,
+- shell execution,
+- installation/extraction,
+- process IDs,
+- process termination,
+- execution callbacks,
+- execution persistence.
+
+A researched execution pattern is approximately:
+
+Application
     ↓
-Analysis
+Shizuku service
     ↓
-Conclusion
+shell command
     ↓
-Architectural implication
+package entry point
     ↓
-Future proposal
-
-These are not interchangeable.
-
-A plausible explanation is not automatically a verified fact.
-
-A documented behavior is not automatically the same as implemented behavior.
-
-A conceptual architecture is not automatically an existing architecture.
-
----
-
-2. Investigation Authority
-
-The investigation program is governed by three documents:
-
-AGENTS.md
+stdout / stderr
     ↓
-Agent/project rules
+execution result
 
-PLAN.md
+The exact implementation must be verified against the current Rootless Store source before reuse.
+
+---
+
+9. Rootless Installation Findings
+
+The investigated Rootless installation flow includes privileged installation for packages requiring elevated execution environments.
+
+The broad behavior is:
+
+Package archive
     ↓
-Investigation scope and phase checklist
-
-INVESTIGATION.md
+validation / preparation
     ↓
-Research methodology and evidence standards
+application-managed staging
+    ↓
+privileged installation/extraction
+    ↓
+installed package directory
 
-"PLAN.md" is the authoritative checklist for investigation scope.
+The precise storage paths and extraction implementation are implementation details that must be verified from the current source.
 
-Do not silently remove, skip, or replace investigation requirements.
-
-If an item cannot be established, record it as unresolved.
-
----
-
-3. Investigation Lifecycle
-
-Every investigation should follow this general process:
-
-1. Define scope
-       ↓
-2. Identify questions
-       ↓
-3. Identify sources
-       ↓
-4. Inspect existing implementation
-       ↓
-5. Perform external research
-       ↓
-6. Collect evidence
-       ↓
-7. Compare sources
-       ↓
-8. Identify contradictions
-       ↓
-9. Identify unknowns
-       ↓
-10. Analyze compatibility/security implications
-       ↓
-11. Form verified conclusions
-       ↓
-12. Identify architectural implications
-       ↓
-13. Produce investigation report
-       ↓
-14. Self-audit against PLAN.md
-       ↓
-15. Mark investigation status
-
-Do not skip directly from research to architectural implementation.
+The ADB Module system should not automatically reuse Rootless's package storage semantics where those semantics conflict with Shevery compatibility.
 
 ---
 
-4. Investigation Scope
+10. Rootless Runtime Persistence
 
-Every investigation must begin by defining its scope.
+Rootless Store contains persistence concepts for executions and runtime state.
 
-The scope should identify:
+The investigation indicates support for:
 
-- phase number
-- phase name
-- specific checklist items
-- technologies involved
-- relevant versions
-- relevant Android versions
-- relevant repositories
-- relevant source trees
-- relevant documentation
-- known limitations
+- storing execution information,
+- tracking process IDs,
+- recovering runtime state,
+- terminating executions,
+- maintaining execution history.
 
-Example:
+This is valuable because ADB Modules also require runtime state that survives ordinary UI lifecycle changes.
 
-Phase:
-4 — Porter Investigation
-
-Scope:
-Porter dependency, SDK/API surface, execution behavior,
-process lifecycle, permissions, failure modes, Android
-compatibility, and integration requirements.
-
-Primary concern:
-Establish the verified contract required for the Porter
-execution backend.
+However, Rootless daemon semantics and Shevery "service.sh" semantics are not equivalent.
 
 ---
 
-5. Questions to Answer
+11. CodeBrick Findings
 
-Before researching, translate checklist items into concrete questions.
+CodeBricks are a distinct Rootless Store concept representing saved commands/automations.
 
-Questions should seek observable or verifiable answers.
+They may be promoted into executable plugin forms.
 
-Good:
+CodeBricks therefore represent a third package family rather than merely another ADB Module format.
 
-How does Porter create a process?
-What API returns the process handle?
-How are stdout and stderr exposed?
-What happens when the Porter service dies?
-
-Weak:
-
-Is Porter good?
-Is this architecture probably okay?
-
-The investigation should favor questions that can be answered through evidence.
+The investigation supports preserving CodeBrick functionality while avoiding unnecessary coupling to the ADB Module system.
 
 ---
 
-6. Source Hierarchy
+12. Rootless Market and Source Findings
 
-Sources should be evaluated according to reliability.
+Rootless Store includes source/catalog concepts for discovering and managing packages.
 
-Level 1 — Primary Implementation Evidence
+The investigated concepts include:
 
-Highest priority.
+- sources,
+- manifests,
+- paging,
+- APIs/gateways,
+- market/catalog behavior,
+- package discovery.
 
-Examples:
+These concepts are potentially reusable for ADB Module catalogs.
 
-- source code
-- exact dependency source
-- exact tagged release
-- exact commit
-- actual Android platform implementation
-- controlled device experiment
+However, source discovery and package execution trust must remain separate concerns.
 
-Level 2 — Official Documentation
-
-Examples:
-
-- official API documentation
-- official developer documentation
-- official project documentation
-- official compatibility documentation
-- official release notes
-
-Level 3 — Official Project Discussions
-
-Examples:
-
-- official issue trackers
-- official discussions
-- official maintainer statements
-- official migration notes
-
-Useful but must be interpreted in context.
-
-Level 4 — High-Quality Secondary Sources
-
-Examples:
-
-- reputable technical documentation
-- detailed engineering articles
-- established technical references
-
-Level 5 — Community Sources
-
-Examples:
-
-- forums
-- Reddit
-- community discussions
-- personal blogs
-- user reports
-
-Useful for discovering behavior or edge cases, but should not automatically establish authoritative behavior.
-
-Level 6 — Search Snippets
-
-Search-result snippets may be used as research leads.
-
-They should not normally be treated as evidence by themselves.
+A package being discoverable from a source does not inherently mean that the package is trusted to execute.
 
 ---
 
-7. Source Recording
+13. Rootless WebUI Findings
 
-Important sources must be recorded.
+Rootless Store has WebUI-related execution concepts.
 
-For each significant source, capture as much as practical:
+This provides useful precedent for exposing package-specific interfaces.
 
-Source:
-Type:
-Project:
-Version:
-Tag:
-Commit:
-Date:
-URL:
-Relevant file/page:
-Relevant section:
-Why it matters:
+However, Shevery's ADB Module WebUI behavior introduces additional compatibility and security requirements, particularly around:
 
-For source code, record:
+- "window.Shizuku",
+- command execution,
+- environment access,
+- network restrictions,
+- WebView security,
+- module-specific policies.
 
-Repository
-Branch/tag/commit
-File path
-Class/function
-Relevant behavior
+Therefore Rootless WebUI functionality cannot simply be assumed to be equivalent to Shevery WebUI functionality.
 
 ---
 
-8. Version Pinning
+14. Shevery Investigation
 
-Version-sensitive findings must be version-aware.
+14.1 Project Role
 
-Record relevant versions for:
+Shevery is the primary compatibility reference for the ADB Module package format and behavior.
 
-- Android
-- Porter
-- Shizuku
-- Shevery
-- Rootless Store
-- Kotlin
-- Android Gradle Plugin
-- important dependencies
-- WebView where relevant
+Official repository:
 
-Do not generalize historical behavior into current behavior.
+"Shevery repository" (https://reference-url-citation.invalid/1)
 
-When exact version information cannot be established:
+Shevery is a modernized Shizuku-based Android application that includes an ADB Modules system.
 
-Version: Unknown
-
-Do not invent a version.
+The project currently changes relatively quickly, so compatibility assumptions should be tied to a specific reference version and regression-tested.
 
 ---
 
-9. Current vs Historical Information
+15. Shevery ADB Module Findings
 
-Every important finding should be classified when historical context matters.
+ADB Modules are ZIP-based packages containing a "module.prop" file at the root.
 
-Use:
+A minimal module can resemble:
 
-Current
-Historical
-Version-specific
-Unknown
+my-module/
+├── module.prop
+├── action.sh
+└── webui/
+    └── index.html
 
-Example:
+The module system is not a Magisk/KSU systemless module framework.
 
-Finding:
-Behavior X existed in version 12.x.
+ADB Modules should therefore not be assumed to support:
 
-Status:
-Historical — requires verification against current release.
-
-Historical evidence remains valuable but must not be presented as current without verification.
-
----
-
-10. Documentation vs Implementation
-
-Always distinguish:
-
-Documented Behavior
-
-Something the official documentation says should happen.
-
-Implemented Behavior
-
-Something verified directly in source code.
-
-Observed Behavior
-
-Something observed during a controlled test.
-
-Inferred Behavior
-
-Something logically inferred from available evidence.
-
-Proposed Behavior
-
-Something the ADB Modules App may choose to implement.
-
-These categories must not be merged.
+- "/data/adb/modules",
+- Magisk mount behavior,
+- KernelSU module hooks,
+- systemless overlay semantics.
 
 ---
 
-11. Evidence Classification
+16. "module.prop" Findings
 
-Use the following evidence classifications:
+The investigated required metadata includes:
 
-VERIFIED
-DOCUMENTED
-OBSERVED
-INFERRED
-PROPOSED
-UNKNOWN
+id=
+name=
+version=
+versionCode=
+author=
+description=
 
-VERIFIED
+Optional/custom metadata can include concepts such as:
 
-Confirmed directly through strong evidence.
+banner=
+webui=
+usesShellBridge=true
+action=
 
-DOCUMENTED
+Paths are relative to the module package.
 
-Explicitly stated by an authoritative source but not independently verified.
+The API documentation indicates that unsafe path forms such as absolute paths and traversal using ".." are rejected.
 
-OBSERVED
+Official guide:
 
-Confirmed through controlled testing.
+"Shevery ADB Modules Guide" (https://reference-url-citation.invalid/2)
 
-INFERRED
+Official API reference:
 
-Reasonably derived from evidence but not directly established.
-
-PROPOSED
-
-A potential architecture or implementation choice.
-
-UNKNOWN
-
-Insufficient evidence to establish the answer.
+"Shevery ADB Modules API" (https://reference-url-citation.invalid/3)
 
 ---
 
-12. Confidence
+17. ADB Module Storage Findings
 
-Where useful, assign confidence:
+The investigated Shevery storage location is conceptually:
 
-High
-Medium
-Low
+/data/user/0/<package>/files/adb_modules/<module-id>
 
-Confidence should reflect evidence quality, not how strongly the researcher feels about the conclusion.
+The exact path should be treated as a compatibility requirement only where required by the supported module contract.
 
-Example:
-
-Claim:
-Porter exposes process termination through API X.
-
-Evidence:
-Source code at commit ABC.
-
-Confidence:
-High
-
-versus:
-
-Claim:
-This behavior probably survives application process death.
-
-Evidence:
-Indirect documentation only.
-
-Confidence:
-Low
+The important observed behavior is that modules are stored inside application-private storage rather than "/data/adb/modules".
 
 ---
 
-13. Conflicting Sources
+18. ADB Module Scripts
 
-When sources conflict:
+The investigated module lifecycle recognizes several script types.
 
-1. Record both claims.
-2. Identify each source.
-3. Compare versions.
-4. Compare dates.
-5. Determine whether the conflict is historical.
-6. Inspect source code where possible.
-7. Perform controlled testing where appropriate.
-8. Record the final interpretation.
-9. Preserve unresolved disagreement when necessary.
+"action.sh"
 
-Do not simply choose the newest-looking source without investigation.
+"action.sh" represents a user-triggered module action.
 
-Do not silently delete contradictory evidence.
+It is not automatically equivalent to a daemon.
 
----
+"service.sh"
 
-14. Contradiction Record
+"service.sh" represents controlled background/service behavior.
 
-Each significant contradiction should contain:
+Its execution is subject to module policy and runtime state.
 
-## Contradiction
-
-### Claim A
-
-Source:
-Version:
-Evidence:
-
-### Claim B
-
-Source:
-Version:
-Evidence:
-
-### Analysis
-
-Possible explanation:
-
-### Resolution
-
-Resolved / Partially resolved / Unresolved
-
-### Impact
-
-What this means for the project.
+This is fundamentally different from simply launching a Rootless daemon plugin.
 
 ---
 
-15. Unknowns
+19. "service.sh" Findings
 
-Unknowns are legitimate investigation results.
+The investigated conditions for automatic service execution include concepts such as:
 
-An investigation should explicitly document:
+- module enabled state,
+- appropriate access mode,
+- background-action permission,
+- active Shizuku binder/session,
+- module policy.
 
-- missing source information
-- undocumented behavior
-- unavailable implementation details
-- conflicting evidence
-- behavior requiring device testing
-- behavior requiring future versions
-- behavior that cannot currently be reproduced
+The manager can execute enabled services once during an applicable Shizuku binder session.
 
-Never replace an unknown with an assumption merely to make the report appear complete.
+This means "service.sh" is a policy-controlled lifecycle feature rather than an unrestricted background process.
 
 ---
 
-16. Experimental Research
+20. ADB Module Environment
 
-When documentation and source inspection are insufficient, controlled experiments may be performed.
+The investigated environment includes variables such as:
 
-Record:
+MODDIR=/data/user/0/<package>/files/adb_modules/<id>
+ASH_STANDALONE=1
+SHIZUKU_MODULE_ID=<id>
+SHIZUKU_MODULE_MODE=safe|custom|full
+SHIZUKU_MODULE_TRUSTED=0|1
+SHIZUKU_MODULE_BACKGROUND=0|1
 
-Device:
-Manufacturer/model:
-Android version:
-App version:
-Dependency versions:
-Backend:
-Configuration:
-Permissions:
-Trust state:
-Network state:
-Battery state:
-Procedure:
-Expected result:
-Observed result:
-Logs:
-Limitations:
+These variables form part of the compatibility surface and should be preserved where required.
 
-Experiments must be reproducible where practical.
+The final implementation should verify exact values and semantics against the targeted Shevery reference version.
 
 ---
 
-17. Device Matrix
+21. ADB Module WebUI Findings
 
-When testing Android-specific behavior, record at minimum:
+ADB Modules can contain a local WebUI.
 
-Android version
-Device
-App version
-Backend
-Permission state
-Trust state
-Network state
-Battery/background state
+A typical structure is:
 
-Do not treat one device result as universal Android behavior.
+module/
+├── module.prop
+├── action.sh
+└── webui/
+    └── index.html
 
----
+The WebUI can optionally interact with a shell bridge.
 
-18. Android-Version Analysis
+The investigated bridge preserves:
 
-When an investigation involves Android behavior, explicitly identify affected versions.
+window.Shizuku
 
-Use the project's compatibility range:
-
-Android 12
-Android 13
-Android 14
-Android 15
-Android 16
-Android 17
-
-For each version, record:
-
-Supported
-Partially supported
-Unsupported
-Unknown
-
-when sufficient evidence exists.
+This namespace should not be casually renamed because existing modules may depend on it.
 
 ---
 
-19. Porter Investigation Method
+22. WebUI Security Findings
 
-Porter requires especially rigorous investigation because it is the primary execution backend.
+The investigated WebUI security controls include restrictions around:
 
-Establish:
+- HTTPS/network access,
+- file/content access,
+- third-party cookies,
+- mixed content,
+- shell bridge exposure,
+- command execution,
+- output limits,
+- timeout limits.
 
-Exact dependency version
-Source revision
-Official documentation
-API surface
-Initialization
-Permission model
-Execution model
-Process model
-Output model
-Termination
-Lifecycle
-Failure states
-Recovery
-Android compatibility
-Security boundaries
+This demonstrates that the WebUI is an execution surface rather than merely a visual interface.
 
-For every important Porter capability, identify:
-
-API
-Input
-Output
-Handle
-Error behavior
-Lifecycle
-Failure behavior
-Recovery behavior
-
-Do not invent a Porter contract.
-
-If the contract cannot yet be established:
-
-Status: Unknown / Requires verification
+Security therefore needs to be treated as part of ADB Module compatibility.
 
 ---
 
-20. Shizuku Investigation Method
+23. WebUI Shell Bridge Findings
 
-Investigate Shizuku as a compatibility backend rather than assuming it defines the entire architecture.
+The investigated API includes concepts similar to:
 
-Research:
-
-- service lifecycle
-- Binder lifecycle
-- UserService
-- permission state
-- process execution
-- output handling
-- termination
-- service death
-- reconnection
-- API-level behavior
-- WebUI compatibility
-- "window.Shizuku"
-- compatibility requirements
-
-Clearly distinguish:
-
-Shizuku behavior
-
-from:
-
-Shevery behavior
+window.Shizuku.exec(...)
 
 and:
 
-ADB Modules App behavior
+window.Shizuku.execWithOptions(...)
+
+The API supports concepts including:
+
+- environment variables,
+- working directories,
+- stdin,
+- timeouts,
+- output limits.
+
+Exact API behavior must be verified from the targeted compatibility reference before implementation.
 
 ---
 
-21. Rootless Store Investigation Method
+24. ADB Module Policy Findings
 
-The Rootless Store investigation must be based on actual implementation evidence wherever possible.
+The investigated Shevery system contains policy concepts including:
 
-Map:
+- Safe mode,
+- Custom access,
+- Full access,
+- background-action permission,
+- WebUI bridge permissions,
+- network/download restrictions,
+- WebView restrictions,
+- command/re-command behavior.
 
-Package structure
-Dependencies
-Domain
-Data
-UI
-Persistence
-Execution
-Runtime
-Market
-Sources
-Notifications
-WebUI
-Recovery
-Testing
+The system also provides per-module trust behavior.
 
-For each major component determine:
-
-Purpose
-Inputs
-Outputs
-Dependencies
-Persistence
-Lifecycle
-Failure behavior
-Consumers
-Extension points
-
-Do not infer architecture solely from package names.
+This demonstrates that execution privilege, module policy, and trust are separate concepts.
 
 ---
 
-22. Shevery Compatibility Investigation Method
+25. Full Trust Findings
 
-Shevery compatibility must be investigated from the actual implementation and current ecosystem.
+The investigated Full Trust behavior can bypass several normal module restrictions.
 
-For each compatibility feature, determine:
+The documented areas include concepts such as:
 
-Format
-Required behavior
-Optional behavior
-Runtime behavior
-Security implications
-Version
-Source evidence
-Compatibility requirement
-Implementation detail
+- Action restrictions,
+- Service restrictions,
+- background restrictions,
+- WebUI bridge restrictions,
+- WebView restrictions,
+- internet/download restrictions,
+- command restrictions.
 
-Particular attention should be given to:
-
-- "module.prop"
-- "action.sh"
-- "service.sh"
-- WebUI
-- custom paths
-- environment variables
-- permissions
-- executable bits
-- ZIP handling
-- trust modes
-- shell bridges
-
-Do not assume every Shevery implementation detail is an ecosystem requirement.
+Full Trust should therefore be treated as an explicit user decision rather than an automatic property of a package.
 
 ---
 
-23. Security Investigation Method
+26. ADB Module Resource Limits
 
-Security investigations must consider both intended behavior and abuse cases.
+The investigated API specifies safety limits including approximately:
 
-For each security boundary ask:
+- maximum ZIP entries: "2048"
+- maximum extracted size: "200 MB"
+- script timeout: "120 seconds"
+- retained output per stream: "64 KB"
 
-What is trusted?
-What is untrusted?
-Who controls the input?
-What privilege does the operation receive?
-Can the input cross a trust boundary?
-Can the operation be redirected?
-Can state be forged?
-Can a malicious package exploit this?
-What happens after failure?
-
-Security analysis must cover:
-
-- package security
-- archive security
-- execution security
-- WebView security
-- environment security
-- backend security
-- update security
-- trust persistence
-- source trust
+These limits are part of the compatibility/security research and should be verified against the exact target version before being treated as immutable constants.
 
 ---
 
-24. Architecture Analysis
+27. ADB Module Installation Findings
 
-Architecture analysis should distinguish:
+The investigated installation behavior is broadly:
 
-Existing Architecture
+ZIP
+ ↓
+archive validation
+ ↓
+module.prop validation
+ ↓
+metadata parsing
+ ↓
+safe extraction
+ ↓
+module storage
+ ↓
+module registration
 
-What the source code currently implements.
+The important security properties include:
 
-Verified Target Architecture
-
-An architecture supported by research evidence and explicit project decisions.
-
-Conceptual Architecture
-
-A model used to reason about the system.
-
-Proposed Architecture
-
-A future implementation design.
-
-Never describe a proposal as though it already exists.
-
----
-
-25. Compatibility Analysis
-
-For each compatibility issue determine:
-
-What is compatible?
-Why is it compatible?
-What evidence proves it?
-What version does it apply to?
-What limitations exist?
-What is not compatible?
-
-Compatibility should not be expressed merely as:
-
-"Supports X."
-
-Prefer:
-
-Compatible with X under conditions A, B, and C.
-Behavior D remains unverified.
+- "module.prop" at the expected location,
+- relative paths,
+- traversal protection,
+- archive-entry limits,
+- extracted-size limits,
+- controlled storage.
 
 ---
 
-26. Security and Compatibility Interaction
+28. Shizuku Findings
 
-Compatibility must never be evaluated independently of security.
+The ADB Module implementation investigated in Shevery uses the active Shizuku server as its privileged execution mechanism.
 
-A compatibility mechanism that:
+The resulting privilege depends on how Shizuku itself was started.
 
-- changes privilege
-- weakens validation
-- bypasses trust
-- exposes additional APIs
-- expands WebView access
-- changes execution semantics
+Conceptually:
 
-must be evaluated for its security consequences.
-
----
-
-27. Lifecycle Analysis
-
-Do not assume a single lifecycle state is sufficient.
-
-Investigate independent dimensions such as:
-
-Package state
-Enablement state
-Execution state
-Backend state
-Permission state
-Trust state
-WebUI state
-Service state
-
-Important distinctions include:
-
-Installed ≠ Enabled ≠ Running
-
-Backend failure ≠ Module failure
-
-Service availability ≠ Service process health
-
-PID ≠ Durable execution identity
-
-These distinctions should be validated rather than merely assumed.
-
----
-
-28. Failure and Recovery Analysis
-
-For every important subsystem ask:
-
-What can fail?
-How is failure detected?
-What state remains?
-What becomes stale?
-Can the system recover?
-Does recovery require user action?
-Can recovery be automatic?
-What data must survive?
-What data must be discarded?
-
-Investigate:
-
-- app process death
-- backend death
-- Binder death
-- module process death
-- reboot
-- force-stop
-- interrupted installation
-- interrupted update
-- partial uninstall
-- corrupted state
-- stale execution records
-- stale PID records
-
----
-
-29. Update Analysis
-
-Treat updates as state transitions rather than simple file replacement.
-
-Investigate:
-
-Detection
-↓
-Download
-↓
-Verification
-↓
-Staging
-↓
-Installation
-↓
-Migration
-↓
-Runtime recovery
-
-Determine:
-
-- what state is preserved
-- what state is replaced
-- what data is migrated
-- what happens after failure
-- whether rollback is possible
-- whether downgrade is possible
-- whether backend compatibility changes
-
----
-
-30. Testing Analysis
-
-Testing investigations must distinguish:
-
-Requirement
-Test case
-Test execution
-Observed result
-Pass/fail
-Unverified behavior
-
-Do not claim:
-
-"Supported"
-
-merely because:
-
-"Tests exist."
-
-A test must actually execute successfully before being considered passed.
-
----
-
-31. Performance Analysis
-
-Performance research should identify:
-
-Operation
-Metric
-Measurement method
-Environment
-Result
-Baseline
-Limitation
-
-Where relevant measure:
-
-- installation time
-- extraction time
-- startup time
-- execution overhead
-- WebUI load time
-- memory
-- storage
-- battery
-- concurrent execution
-- large archives
-- large output
-
-Avoid unsupported performance claims.
-
----
-
-32. Reliability Analysis
-
-Reliability investigations should test repeated and abnormal conditions.
-
-Examples:
-
-Start → Stop → Start
-Backend death → Recovery
-App death → Recovery
-Reboot → Recovery
-Permission revoked → Recovery
-Network failure → Recovery
-Low storage → Recovery
-Low memory → Recovery
-Force-stop → Recovery
-
-Document both successful recovery and unrecoverable conditions.
-
----
-
-33. Interoperability Analysis
-
-Interoperability testing should include:
-
-- ordinary modules
-- unusual modules
-- modules with custom metadata
-- modules with WebUI
-- modules with "service.sh"
-- modules using shell bridges
-- modules using custom paths
-- modules depending on environment variables
-- modules depending on specific shell behavior
-
-Do not test only ideal/minimal modules.
-
----
-
-34. Evidence Ledger
-
-For significant claims, maintain an evidence record:
-
-Claim:
-Source:
-Version:
-Commit:
-Evidence location:
-Evidence type:
-Confidence:
-Status:
-Notes:
-
-Example:
-
-Claim:
-service.sh executes once per binder session.
-
-Source:
-Shevery source.
-
-Version:
-X.Y.Z
-
-Evidence location:
-path/to/file
-
-Evidence type:
-Source code
-
-Confidence:
-High
-
-Status:
-Verified
-
----
-
-35. Investigation Report Format
-
-Every completed phase should produce a comprehensive report.
-
-Use this structure:
-
-# ADB Modules App — Phase X — Investigation
-
-## 1. Scope
-
-## 2. Questions to Answer
-
-## 3. Primary Sources
-
-## 4. Secondary Sources
-
-## 5. Existing Implementation Evidence
-
-## 6. Compatibility Findings
-
-## 7. Security Findings
-
-## 8. Architecture Implications
-
-## 9. Unknowns
-
-## 10. Contradictions
-
-## 11. Verified Conclusions
-
-## 12. Recommendations for MasterRef Expansion
-
-## 13. Sources / References
-
-## 14. Items Requiring Future Investigation
-
-Add additional sections when required by the phase.
-
----
-
-36. Investigation Report Quality
-
-A report is not complete merely because it is long.
-
-A good report must be:
-
-- evidence-driven
-- traceable
-- version-aware
-- technically specific
-- internally consistent
-- explicit about uncertainty
-- explicit about contradictions
-- clear about implementation vs proposal
-- useful for later architecture decisions
-
-Avoid padding.
-
----
-
-37. MasterRef Incorporation
-
-Investigation reports are intermediate research artifacts.
-
-They are not automatically authoritative.
-
-Before incorporating findings into "MasterRef.md":
-
-1. Review the source.
-2. Verify the claim.
-3. Check version context.
-4. Check for contradictory evidence.
-5. Determine whether the claim is current.
-6. Determine whether it is implementation evidence or documentation.
-7. Determine whether it is a project proposal.
-8. Identify affected MasterRef sections.
-9. Preserve uncertainty where necessary.
-
----
-
-38. Phase 25 Audit Method
-
-Phase 25 must compare:
-
-Investigation Findings
-        ↕
-MasterRef.md
-
-Look for:
-
-Missing
-Outdated
-Incorrect
-Unsupported
-Duplicated
-Contradictory
-Overly conceptual
-Insufficiently sourced
-
-The audit should produce a concrete list of MasterRef changes.
-
-Do not immediately make those changes merely because they were identified.
-
----
-
-39. Phase 26 Incorporation Method
-
-Phase 26 converts verified investigation findings into MasterRef updates.
-
-For each proposed change record:
-
-Investigation:
-Finding:
-Evidence:
-Current MasterRef section:
-Required change:
-Reason:
-Classification:
-
-Classify the resulting content as appropriate:
-
-Verified fact
-Implementation evidence
-Documented behavior
-Conceptual architecture
-Proposed design
-Unknown
-Historical behavior
-Future possibility
-
----
-
-40. No Silent Corrections
-
-Do not silently alter the project's conceptual model because new evidence was discovered.
-
-When a finding conflicts with existing architecture:
-
-1. Identify the conflict.
-2. Record the evidence.
-3. Explain the difference.
-4. Determine whether the existing architecture is outdated.
-5. Update the appropriate investigation/audit document.
-6. Incorporate the change only through the proper phase.
-
----
-
-41. Research Completeness
-
-A checklist item is complete when the investigation has established one of:
-
-Verified answer
-Documented answer
-Verified limitation
-Verified incompatibility
-Verified historical behavior
-Explicit unresolved question
-
-A checkbox should not be marked complete merely because someone searched for the topic.
-
----
-
-42. Phase Completion Criteria
-
-Before a phase is considered complete:
-
-- [ ] Every applicable checklist item has been addressed.
-- [ ] Primary sources have been reviewed.
-- [ ] Relevant implementation evidence has been inspected.
-- [ ] Relevant external documentation has been reviewed.
-- [ ] Important claims have version context.
-- [ ] Contradictions are documented.
-- [ ] Unknowns are documented.
-- [ ] Compatibility findings are documented.
-- [ ] Security implications are documented.
-- [ ] Architecture implications are documented.
-- [ ] The investigation report is complete.
-- [ ] The report has been checked against "PLAN.md".
-- [ ] Remaining limitations are explicitly recorded.
-
----
-
-43. Research Status
-
-Use these statuses:
-
-Not Started
-In Progress
-Research Complete
-Awaiting Verification
-Audited
-Complete
-Blocked
-
-Not Started
-
-No meaningful research has begun.
-
-In Progress
-
-Research is actively occurring.
-
-Research Complete
-
-Research activity for the current scope has finished, but verification/audit remains.
-
-Awaiting Verification
-
-Important findings require additional evidence or testing.
-
-Audited
-
-The investigation has been reviewed against the checklist.
-
-Complete
-
-The phase satisfies its completion criteria.
-
-Blocked
-
-Progress requires information, access, tooling, or a decision that is currently unavailable.
-
----
-
-44. Investigation Index
-
-Maintain an index of completed and active investigations.
-
-Recommended information:
-
-Phase
-Name
-Status
-Report
-Start date
-Completion date
-Primary sources
-Major unknowns
-Major contradictions
-MasterRef impact
-
----
-
-45. Unknowns Register
-
-Maintain a central list of unresolved questions when practical.
-
-Each entry should include:
-
-Unknown:
-Phase:
-Why unknown:
-Evidence already checked:
-What would resolve it:
-Priority:
-
-Do not allow unresolved questions to disappear merely because a phase is marked complete.
-
----
-
-46. Contradictions Register
-
-Maintain a central record of significant contradictions.
-
-Each entry should include:
-
-Issue:
-Phase:
-Source A:
-Source B:
-Version difference:
-Possible explanation:
-Current resolution:
-Remaining uncertainty:
-Impact:
-
----
-
-47. Source Register
-
-Maintain a source register for major external technologies.
-
-At minimum, track:
-
-Project
-Source
-Version
-Repository
-Commit/tag
-Documentation
-Relevant files
-Date checked
-Investigation phases
-
-This is especially important for:
-
-- Rootless Store
-- Shevery
-- Porter
-- Shizuku
-- Android platform behavior
-
----
-
-48. Research Efficiency
-
-Thoroughness does not require researching the same fact repeatedly.
-
-When a fact has already been established:
-
-- reuse the evidence
-- reference the original investigation
-- verify that the evidence remains current
-- investigate only new context required by the current phase
-
-Do not duplicate entire investigations unnecessarily.
-
-However, do not reuse old evidence blindly when the current phase depends on newer versions or changed behavior.
-
----
-
-49. Research Depth
-
-Research should proceed through multiple layers when necessary:
-
-Surface documentation
+Shizuku started through ADB
         ↓
-Official documentation
-        ↓
-Source code
-        ↓
-Version history
-        ↓
-Issues/discussions
-        ↓
-Controlled testing
-        ↓
-Cross-source verification
+ADB shell-level execution
 
-Not every question requires every layer.
+Shizuku started with root
+        ↓
+root-level execution
 
-High-risk architectural or security questions should generally receive deeper verification.
+Therefore Shizuku is a mechanism for obtaining a privileged execution context, while the actual privilege level depends on the active Shizuku server.
 
 ---
 
-50. Search Strategy
+29. Porter Investigation
 
-When researching an unfamiliar topic:
+Porter is intended to become the primary privileged execution mechanism for this project.
 
-1. Identify the official project.
-2. Find official documentation.
-3. Identify source repository.
-4. Determine current version.
-5. Inspect relevant implementation.
-6. Search release history.
-7. Search issues/discussions for known edge cases.
-8. Compare findings.
-9. Test when necessary.
+However, Porter APIs must not be inferred from:
 
-Use search engines primarily to discover sources.
+- Shizuku APIs,
+- Rootless APIs,
+- Shevery APIs,
+- memory of another project,
+- similarly named classes.
 
-Use the source itself as evidence whenever possible.
+The actual Porter dependency/source must be inspected before implementation.
+
+The investigation therefore establishes the requirement for Porter support without inventing its API surface.
 
 ---
 
-51. Avoiding Research Drift
+30. Porter and Shizuku Relationship
 
-Stay within the active phase.
+The intended relationship is:
 
-If a new topic appears:
+                    Execution Request
+                           │
+                           ▼
+                 Execution Abstraction
+                    /             \
+                   /               \
+                  ▼                 ▼
+        Porter Execution     Shizuku Compatibility
+             PRIMARY                SECONDARY
 
-- determine whether it belongs to the current phase
-- record it as a follow-up if necessary
-- avoid abandoning the current investigation
-- avoid silently expanding the phase beyond "PLAN.md"
+The investigation does not establish that Porter and Shizuku have identical capabilities.
 
-Cross-phase dependencies should be documented.
+Their capabilities must be discovered and represented accurately.
 
 ---
 
-52. Cross-Phase Dependencies
+31. Capability Findings
 
-Some investigations depend on earlier findings.
+A backend may support some operations while another does not.
 
-Examples:
+Relevant capability categories may include:
 
-Phase 4 Porter
+- shell execution,
+- process management,
+- persistent processes,
+- environment configuration,
+- file operations,
+- privileged installation,
+- background execution,
+- WebUI shell bridging,
+- module services.
+
+The exact capability set should be derived from verified backend behavior.
+
+A backend must not claim capabilities it cannot actually provide.
+
+---
+
+32. Privilege Findings
+
+The investigation distinguishes:
+
+Backend
     ↓
-Phase 6 Execution Abstraction
+How execution is provided
 
-Phase 2 Module Compatibility
+Privilege
     ↓
-Phase 3 Lifecycle
-    ↓
-Phase 14 Runtime Recovery
+What authority the process actually has
 
-Phase 7 Security
+Policy
     ↓
-Phase 8 WebUI
+What the package is permitted to do
+
+Trust
     ↓
-Phase 16 UI/UX
+Whether the user explicitly trusts the package
 
-When a later phase depends on unresolved earlier findings:
-
-- reference the earlier investigation
-- identify the unresolved dependency
-- do not invent an answer solely to continue
+These concepts should not be treated as interchangeable.
 
 ---
 
-53. Architectural Decision Discipline
+33. Backend Fallback Findings
 
-Investigations may produce architectural implications.
+The investigation identified a significant compatibility concern:
 
-However:
+A backend change can potentially change the privilege level of a package.
 
-Research finding
-    ≠
-Automatic implementation decision
+For example:
 
-A finding may show that:
+Porter unavailable
+      ↓
+automatic Shizuku fallback
+      ↓
+different privilege environment
 
-- an architecture is possible
-- an architecture is impossible
-- an abstraction is too broad
-- an abstraction is too narrow
-- a compatibility layer is required
-- a security boundary must change
+This cannot be treated as a harmless implementation detail.
 
-The final project decision should remain explicit.
+Any fallback behavior must preserve the user's explicit execution expectations and must never silently escalate or otherwise change privilege semantics.
 
 ---
 
-54. Future-Facing Research
+34. Package-Type Findings
 
-Future possibilities must remain clearly separated from current requirements.
+The investigation supports three distinct package families:
 
-Use:
+Rootless Plugin
+ADB Module
+CodeBrick
 
-Current
-Planned
-Proposed
-Future
-Speculative
+They share some management concerns, such as:
 
-Do not turn speculative capabilities into project requirements without an explicit decision.
+- installation,
+- metadata,
+- execution,
+- persistence,
+- updates,
+- user interface.
 
----
+However, their formats and lifecycle semantics differ.
 
-55. Final Investigation Standard
-
-A successful investigation should allow a future developer to answer:
-
-What is this?
-How does it work?
-Where is it implemented?
-What version does this apply to?
-What does the documentation say?
-What does the source code say?
-What have we actually tested?
-What Android versions are affected?
-What are the security implications?
-What are the failure modes?
-What happens when something dies?
-What is compatible?
-What is incompatible?
-What remains unknown?
-What architectural consequences follow?
-What should be incorporated into MasterRef?
-
-If the investigation cannot answer a question, explicitly document why.
+Therefore common infrastructure can be shared where semantics genuinely overlap, while package-specific behavior remains separate.
 
 ---
 
-56. Final Rule
+35. Package Identity Findings
 
-«Research before assuming.
+The research indicates that package identity should not be conflated with execution backend.
 
-Verify before claiming.
+Conceptually:
 
-Document before incorporating.
+Package
+  = what is being executed
 
-Preserve uncertainty rather than inventing certainty.
+Backend
+  = how it is executed
 
-Keep implementation evidence, documentation, observation, inference, and proposals clearly separated.»
+Privilege
+  = authority available
 
-The goal is not to make every question appear answered.
+Policy
+  = permitted behavior
 
-The goal is to create a traceable, evidence-backed technical understanding that can safely support the architecture and future implementation of the ADB Modules App.
+Trust
+  = user's trust decision
+
+Runtime State
+  = current execution condition
+
+This separation is one of the most important findings from comparing Rootless Store and Shevery.
+
+---
+
+36. Source Trust Findings
+
+A package source can provide:
+
+- metadata,
+- package discovery,
+- version information,
+- download location,
+- update information.
+
+That does not automatically establish execution trust.
+
+The research therefore identifies two separate concepts:
+
+Source Trust
+     ≠
+Execution Trust
+
+A catalog should not silently grant a package permission to execute.
+
+---
+
+37. Update Findings
+
+Both package management and catalog functionality introduce update concerns.
+
+The investigation identifies the need to distinguish:
+
+- discovering an update,
+- downloading an update,
+- validating an update,
+- installing an update,
+- replacing an installed version,
+- preserving user/runtime state,
+- deciding whether execution is trusted.
+
+An update should not be treated as trusted merely because the package was previously installed.
+
+---
+
+38. Runtime Recovery Findings
+
+Rootless Store's runtime persistence/recovery concepts provide useful precedent.
+
+ADB Modules introduce additional recovery cases involving:
+
+- active scripts,
+- service processes,
+- Shizuku binder sessions,
+- enabled modules,
+- interrupted installations,
+- incomplete extraction,
+- stale process state.
+
+These behaviors need explicit compatibility handling rather than assuming Rootless runtime recovery automatically applies.
+
+---
+
+39. Android Compatibility Findings
+
+Shevery's current development includes Android 16/17 compatibility work.
+
+The investigation found documentation concerning hidden API compatibility issues affecting the original Shizuku release under Android 17.
+
+The important conclusion is not that a specific Android version is permanently supported by either project, but that:
+
+- Android version compatibility is an active concern,
+- Shizuku compatibility may differ by Android version,
+- backend compatibility must be tested independently,
+- the targeted Shevery compatibility reference must be version-pinned.
+
+---
+
+40. Shevery Compatibility Boundary
+
+The project should target ADB Module compatibility, not complete Shevery application compatibility.
+
+Compatibility should therefore focus on the documented module contract:
+
+module.prop
+scripts
+environment
+storage behavior
+policy behavior
+WebUI behavior
+window.Shizuku bridge
+execution limits
+lifecycle semantics
+
+Shevery-specific application features that are unrelated to the ADB Module contract are not automatically required.
+
+---
+
+41. Features Not Automatically Imported From Shevery
+
+The investigation does not establish a requirement to copy every Shevery feature.
+
+Examples include:
+
+- Gemini explanation,
+- Commandium,
+- AI command generation,
+- Shevery-specific UI,
+- Shevery-specific Shizuku management,
+- experimental Dhizuku behavior,
+- unrelated command tools.
+
+These features may be investigated separately if they become relevant to the project's goals.
+
+---
+
+42. Features Not Automatically Imported From Rootless Store
+
+Likewise, Rootless Store behavior should not automatically be imposed on ADB Modules.
+
+Examples include:
+
+- treating every ADB Module as a Rootless daemon,
+- forcing Rootless Plugin metadata onto modules,
+- using Rootless-specific storage paths where incompatible,
+- assuming Rootless execution contexts exactly match module policy,
+- automatically converting "service.sh" into a generic daemon.
+
+---
+
+43. License and Attribution Findings
+
+The investigated projects have their own licensing requirements.
+
+Rootless Store is currently licensed under AGPL-3.0.
+
+Shevery's README states that its code files are Apache 2.0.
+
+License compatibility, notices, attribution, and file-level provenance must be audited before copying or adapting code.
+
+The project should prefer behavioral compatibility and clean-room integration over indiscriminate source merging.
+
+---
+
+44. Current Research Conclusions
+
+The investigation establishes the following major findings:
+
+1. Rootless Store provides a useful foundation for package management, execution, persistence, sources, and CodeBricks.
+2. Shevery provides the primary reference for ADB Module compatibility.
+3. ADB Modules are distinct from Rootless Plugins.
+4. ADB Modules are not Magisk/KSU systemless modules.
+5. "module.prop" is a central compatibility surface.
+6. "action.sh" and "service.sh" have different lifecycle semantics.
+7. ADB Module WebUI is an execution surface and requires security controls.
+8. "window.Shizuku" is an important compatibility surface.
+9. Shizuku privilege depends on how the Shizuku server was started.
+10. Porter is intended to be the primary execution backend.
+11. Shizuku is intended as compatibility support rather than the project's core execution abstraction.
+12. Backend, privilege, policy, trust, and runtime state are separate concepts.
+13. Automatic backend fallback can alter execution semantics and therefore cannot be treated casually.
+14. Source trust and execution trust are separate.
+15. Rootless Plugin, ADB Module, and CodeBrick formats should remain distinct.
+16. Runtime persistence and recovery are important across package types but cannot be assumed to have identical semantics.
+17. Android-version compatibility must be verified against current backend/reference versions.
+18. Shevery application features outside the ADB Module contract are not automatically project requirements.
+19. Rootless Store features outside the common package/runtime foundation are not automatically applicable to ADB Modules.
+20. License and provenance must be verified before reusing source code.
+
+---
+
+45. Research-to-Architecture Boundary
+
+The investigation produces evidence.
+
+The architecture determines how that evidence is represented in the application.
+
+For example:
+
+Investigation finding:
+Shevery requires module.prop at ZIP root.
+                    ↓
+Architecture decision:
+ADB Modules have a dedicated manifest/parser boundary.
+                    ↓
+Plan:
+Implement archive validation and module.prop parsing.
+
+Similarly:
+
+Investigation finding:
+Porter and Shizuku may provide different capabilities.
+                    ↓
+Architecture decision:
+Execution backends expose explicit capabilities.
+                    ↓
+Plan:
+Implement capability discovery and backend resolution.
+
+The investigation itself does not prescribe the class names, module structure, or implementation sequence.
+
+---
+
+46. Research Maintenance
+
+This document should be updated when:
+
+- Rootless Store behavior changes,
+- Shevery changes its ADB Module contract,
+- Porter behavior/API changes,
+- Shizuku compatibility changes,
+- Android platform behavior changes,
+- new security constraints are discovered,
+- compatibility testing reveals previously unknown behavior,
+- licensing or provenance information changes.
+
+When a new finding changes the architecture, the architecture document must be updated separately.
+
+When a new finding changes implementation scope or order, the plan must be updated separately.
+
+When a new finding changes agent behavior or safety requirements, the agent rules must be updated separately.
+
+The research record should remain focused on what was discovered and what evidence supports it.
+
+---
+
+47. Final Research Model
+
+The project should continue to reason about the system using this model:
+
+                    RESEARCH
+                       │
+                       ▼
+              INVESTIGATION.md
+                       │
+             verified findings
+                       │
+                       ▼
+               ARCHITECTURE.md
+                       │
+              system structure
+                       │
+                       ▼
+                  PLAN.md
+                       │
+             implementation order
+                       │
+                       ▼
+                IMPLEMENTATION
+
+Agent behavior surrounds the entire process:
+
+                         AGENTS.md
+                    ┌───────────────┐
+                    │ Rules / Safety│
+                    │ / Workflow    │
+                    └───────┬───────┘
+                            │
+                            ▼
+ INVESTIGATION → ARCHITECTURE → PLAN → IMPLEMENTATION
+
+"README.md" remains the public-facing explanation of the resulting project and is not an implementation source of truth.
