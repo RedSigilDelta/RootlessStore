@@ -61,9 +61,9 @@ Document | Authority
 "AGENTS.md" | Agent behavior and project rules
 "PLAN.md" | Investigation scope and phase order
 "INVESTIGATION_METHOD.md" | Investigation methodology and evidence standards
-"ARCHITECTURE.md" | Current architectural direction
+"ARCHITECTURE.md" | Current proposed architecture
 "INVESTIGATION.md" | Original pre-MasterRef investigation and historical research/reference material
-"MasterRef.md" | Synthesized project knowledge/reference
+"MasterRef.md" | Consolidated project reference
 "README.md" | Project overview and user-facing information
 
 If documents conflict:
@@ -83,25 +83,27 @@ Document the contradiction when necessary.
 
 The project follows a strict research-first workflow.
 
-Investigate
+Research
     ↓
-Collect evidence
+Evidence Collection
     ↓
-Analyze
+Investigation Report
     ↓
-Document findings
+Verification / Audit
     ↓
-Audit findings
+Verified Findings
     ↓
-Verify
+MasterRef Audit
     ↓
-Incorporate into MasterRef
+MasterRef Incorporation
     ↓
-Implement
+Architecture Confirmation / Revision
+    ↓
+Application Development
 
-Do not reverse this order merely for convenience.
+Do not reverse this order merely for convenience. Architecture Confirmation / Revision occurs after Phase 26 and is not a new investigation phase or Phase 27.
 
-Do not begin implementation based on assumptions that could reasonably be resolved through investigation.
+Do not begin application development based on assumptions that could reasonably be resolved through investigation. Treat ARCHITECTURE.md as the current proposed architecture: verified findings may confirm, modify, replace, or invalidate it.
 
 ---
 

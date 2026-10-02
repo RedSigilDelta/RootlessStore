@@ -30,9 +30,10 @@ The other project documents have narrower purposes:
 | Document | Purpose |
 | --- | --- |
 | "AGENTS.md" | Rules for agents working on the project |
-| "INVESTIGATION.md" | Research findings and evidence |
-| "ARCHITECTURE.md" | Structural architecture |
-| "PLAN.md" | Implementation sequence |
+| "INVESTIGATION_METHOD.md" | Investigation methodology and evidence standards |
+| "INVESTIGATION.md" | Original pre-MasterRef investigation and historical research/reference |
+| "ARCHITECTURE.md" | Current proposed architecture |
+| "PLAN.md" | Authoritative investigation scope and phase order |
 | "README.md" | Public project explanation |
 | This document | My complete personal knowledge base |
 
@@ -106,7 +107,7 @@ The initial direction was:
 
 Research then revealed that this was viable, but only if the two package ecosystems were kept conceptually separate.
 
-That led to the current architecture.
+That led to the current proposed architecture. The proposal remains subject to investigation and verification.
 
 ## 3. Project Goals
 
@@ -700,7 +701,7 @@ Reference policy concepts include:
 - background action permission
 - service permission
 
-The final architecture should represent these as policy rather than embedding them inside the backend.
+The current proposed architecture represents these as policy rather than embedding them inside the backend. This remains subject to investigation and verification.
 
 ### 38. EXECUTION PERMISSION
 
@@ -1794,11 +1795,11 @@ Notifications should not become the only source of runtime information.
 
 # Part XIV — Development Plan
 
-## 59. Master Implementation Plan
+## 59. Post-Investigation Implementation Sequence (Non-Authoritative)
 
-### 103. DEVELOPMENT PHASES
+### 103. IMPLEMENTATION STEPS
 
-The official implementation plan currently contains 55 major stages, numbered 0–54.
+The post-investigation implementation reference contains 55 major implementation steps, numbered 0–54. These steps are non-authoritative and must not be confused with the canonical investigation phases defined by PLAN.md.
 
 They are grouped conceptually into:
 
@@ -1828,7 +1829,7 @@ Release
 Audit
 ```
 
-### 104. PHASE 0 — BASELINE
+### 104. IMPLEMENTATION STEP 0 — BASELINE
 
 Before changing code:
 
@@ -1838,7 +1839,7 @@ Before changing code:
 - record baseline
 - identify existing functionality
 
-### 105. PHASE 1 — SOURCE/LICENSE AUDIT
+### 105. IMPLEMENTATION STEP 1 — SOURCE/LICENSE AUDIT
 
 Determine:
 
@@ -1849,7 +1850,7 @@ Determine:
 - notices
 - attribution requirements
 
-### 106. PHASE 2 — ARCHITECTURE EXTRACTION
+### 106. IMPLEMENTATION STEP 2 — ARCHITECTURE EXTRACTION
 
 Map the current Rootless architecture.
 
@@ -1865,13 +1866,13 @@ Identify:
 - source
 - runtime
 
-### 107. PHASE 3 — EXECUTION ABSTRACTION
+### 107. IMPLEMENTATION STEP 3 — EXECUTION ABSTRACTION
 
 Introduce/define backend-neutral execution semantics.
 
 Do this before deep Porter/Shizuku integration.
 
-### 108. PHASE 4 — PRIVILEGE/CAPABILITY MODEL
+### 108. IMPLEMENTATION STEP 4 — PRIVILEGE/CAPABILITY MODEL
 
 Separate:
 
@@ -1880,11 +1881,11 @@ Separate:
 - privilege
 - policy
 
-### 109. PHASE 5 — PORTER BACKEND
+### 109. IMPLEMENTATION STEP 5 — PORTER BACKEND
 
 Implement the primary backend against verified Porter APIs.
 
-### 110. PHASE 6 — PORTER VALIDATION
+### 110. IMPLEMENTATION STEP 6 — PORTER VALIDATION
 
 Test:
 
@@ -1895,31 +1896,31 @@ Test:
 - capabilities
 - privilege semantics
 
-### 111. PHASE 7 — SHIZUKU BACKEND
+### 111. IMPLEMENTATION STEP 7 — SHIZUKU BACKEND
 
 Implement Shizuku behind the same abstraction.
 
-### 112. PHASE 8 — BACKEND RESOLVER
+### 112. IMPLEMENTATION STEP 8 — BACKEND RESOLVER
 
 Create the logic that determines which backend can satisfy a request.
 
-### 113. PHASE 9 — ROOTLESS REGRESSION
+### 113. IMPLEMENTATION STEP 9 — ROOTLESS REGRESSION
 
 Before going deeper into ADB Modules, verify Rootless behavior remains intact.
 
-### 114. PHASE 10 — COMMON PACKAGE MODEL
+### 114. IMPLEMENTATION STEP 10 — COMMON PACKAGE MODEL
 
 Introduce only genuinely shared package concepts.
 
-### 115. PHASE 11 — ADB MODULE DOMAIN
+### 115. IMPLEMENTATION STEP 11 — ADB MODULE DOMAIN
 
 Create module-specific domain concepts.
 
-### 116. PHASE 12 — MODULE.PROP PARSER
+### 116. IMPLEMENTATION STEP 12 — MODULE.PROP PARSER
 
 Implement parser and validation.
 
-### 117. PHASE 13 — ARCHIVE VALIDATION
+### 117. IMPLEMENTATION STEP 13 — ARCHIVE VALIDATION
 
 Implement:
 
@@ -1929,51 +1930,51 @@ Implement:
 - entry limits
 - root structure validation
 
-### 118. PHASE 14 — STAGED INSTALLATION
+### 118. IMPLEMENTATION STEP 14 — STAGED INSTALLATION
 
 Implement safe installation.
 
-### 119. PHASE 15 — STORAGE
+### 119. IMPLEMENTATION STEP 15 — STORAGE
 
 Implement persistent module storage.
 
-### 120. PHASE 16 — MODULE ENVIRONMENT
+### 120. IMPLEMENTATION STEP 16 — MODULE ENVIRONMENT
 
 Implement compatibility environment variables.
 
-### 121. PHASE 17 — ACTION RUNTIME
+### 121. IMPLEMENTATION STEP 17 — ACTION RUNTIME
 
 Implement "action.sh".
 
-### 122. PHASE 18 — SERVICE RUNTIME
+### 122. IMPLEMENTATION STEP 18 — SERVICE RUNTIME
 
 Implement "service.sh".
 
-### 123. PHASE 19 — ENABLE/DISABLE
+### 123. IMPLEMENTATION STEP 19 — ENABLE/DISABLE
 
 Implement module lifecycle state.
 
-### 124. PHASE 20 — EXECUTION LOGGING
+### 124. IMPLEMENTATION STEP 20 — EXECUTION LOGGING
 
 Persist execution information.
 
-### 125. PHASE 21 — POLICY
+### 125. IMPLEMENTATION STEP 21 — POLICY
 
 Implement policy evaluation.
 
-### 126. PHASE 22 — TRUST
+### 126. IMPLEMENTATION STEP 22 — TRUST
 
 Implement package trust.
 
-### 127. PHASE 23 — WEBUI
+### 127. IMPLEMENTATION STEP 23 — WEBUI
 
 Implement local WebUI.
 
-### 128. PHASE 24 — WINDOW.SHIZUKU
+### 128. IMPLEMENTATION STEP 24 — WINDOW.SHIZUKU
 
 Implement the compatibility bridge.
 
-### 129. PHASE 25 — WEBUI SECURITY
+### 129. IMPLEMENTATION STEP 25 — WEBUI SECURITY
 
 Harden:
 
@@ -1983,99 +1984,99 @@ Harden:
 - bridge
 - WebView restrictions
 
-### 130. PHASE 26 — PROCESS MANAGEMENT
+### 130. IMPLEMENTATION STEP 26 — PROCESS MANAGEMENT
 
 Implement process tracking and control.
 
-### 131. PHASE 27 — RUNTIME PERSISTENCE
+### 131. IMPLEMENTATION STEP 27 — RUNTIME PERSISTENCE
 
 Persist active execution state.
 
-### 132. PHASE 28 — RUNTIME RECOVERY
+### 132. IMPLEMENTATION STEP 28 — RUNTIME RECOVERY
 
 Reconcile persisted state with actual state.
 
-### 133. PHASE 29 — CODEBRICKS
+### 133. IMPLEMENTATION STEP 29 — CODEBRICKS
 
 Verify CodeBrick preservation/integration.
 
-### 134. PHASE 30 — SOURCE ARCHITECTURE
+### 134. IMPLEMENTATION STEP 30 — SOURCE ARCHITECTURE
 
 Extend Rootless source infrastructure where necessary.
 
-### 135. PHASE 31 — CATALOG
+### 135. IMPLEMENTATION STEP 31 — CATALOG
 
 Implement ADB Module discovery/catalog support.
 
-### 136. PHASE 32 — UPDATES
+### 136. IMPLEMENTATION STEP 32 — UPDATES
 
 Implement package update architecture.
 
-### 137. PHASE 33 — PACKAGE UI
+### 137. IMPLEMENTATION STEP 33 — PACKAGE UI
 
 Create unified package presentation.
 
-### 138. PHASE 34 — BACKEND UI
+### 138. IMPLEMENTATION STEP 34 — BACKEND UI
 
 Display backend state and capability.
 
-### 139. PHASE 35 — DEVICE/RUNTIME UI
+### 139. IMPLEMENTATION STEP 35 — DEVICE/RUNTIME UI
 
 Expose runtime health and state.
 
-### 140. PHASE 36 — PACKAGE DETAILS
+### 140. IMPLEMENTATION STEP 36 — PACKAGE DETAILS
 
 Provide complete package information.
 
-### 141. PHASE 37 — ERROR/RECOVERY UI
+### 141. IMPLEMENTATION STEP 37 — ERROR/RECOVERY UI
 
 Make failures understandable and actionable.
 
-### 142. PHASE 38 — CORE UNIT TESTING
+### 142. IMPLEMENTATION STEP 38 — CORE UNIT TESTING
 
 Expand automated test coverage.
 
-### 143. PHASE 39 — ADB MODULE COMPATIBILITY
+### 143. IMPLEMENTATION STEP 39 — ADB MODULE COMPATIBILITY
 
 Test real module behavior.
 
-### 144. PHASE 40 — REFERENCE MODULES
+### 144. IMPLEMENTATION STEP 40 — REFERENCE MODULES
 
 Build the reference fixture collection.
 
-### 145. PHASE 41 — PORTER INTEGRATION TESTING
+### 145. IMPLEMENTATION STEP 41 — PORTER INTEGRATION TESTING
 
 Test the primary backend.
 
-### 146. PHASE 42 — SHIZUKU TESTING
+### 146. IMPLEMENTATION STEP 42 — SHIZUKU TESTING
 
 Test compatibility backend.
 
-### 147. PHASE 43 — BACKEND SWITCHING
+### 147. IMPLEMENTATION STEP 43 — BACKEND SWITCHING
 
 Verify correct resolution and no silent privilege changes.
 
-### 148. PHASE 44 — SECURITY VALIDATION
+### 148. IMPLEMENTATION STEP 44 — SECURITY VALIDATION
 
 Perform focused security review/testing.
 
-### 149. PHASE 45 — PERSISTENCE/RECOVERY
+### 149. IMPLEMENTATION STEP 45 — PERSISTENCE/RECOVERY
 
 Test runtime durability.
 
-### 150. PHASE 46 — PERFORMANCE
+### 150. IMPLEMENTATION STEP 46 — PERFORMANCE
 
 Test resource usage.
 
-### 151. PHASE 47 — DEVICE COMPATIBILITY
+### 151. IMPLEMENTATION STEP 47 — DEVICE COMPATIBILITY
 
 Test across supported Android/device environments.
 
-### 152. PHASE 48 — UI/UX
+### 152. IMPLEMENTATION STEP 48 — UI/UX
 
 Polish the final experience after functionality is proven.
 
-### 153. PHASE 49 — DOCUMENTATION
+### 153. IMPLEMENTATION STEP 49 — DOCUMENTATION
 
 Synchronize:
 
@@ -2085,7 +2086,7 @@ Synchronize:
 - plan
 - agents
 
-### 154. PHASE 50 — RELEASE PREPARATION
+### 154. IMPLEMENTATION STEP 50 — RELEASE PREPARATION
 
 Prepare:
 
@@ -2095,7 +2096,7 @@ Prepare:
 - release documentation
 - compatibility notes
 
-### 155. PHASE 51 — FINAL COMPATIBILITY AUDIT
+### 155. IMPLEMENTATION STEP 51 — FINAL COMPATIBILITY AUDIT
 
 Review:
 
@@ -2105,7 +2106,7 @@ Review:
 - Shizuku compatibility
 - Android compatibility
 
-### 156. PHASE 52 — ARCHITECTURE AUDIT
+### 156. IMPLEMENTATION STEP 52 — ARCHITECTURE AUDIT
 
 Verify the final implementation still follows:
 
@@ -2121,13 +2122,13 @@ Trust
 ≠
 Runtime
 
-### 157. PHASE 53 — ADAPTIVE EXPANSION
+### 157. IMPLEMENTATION STEP 53 — ADAPTIVE EXPANSION
 
 Determine whether legitimate gaps remain.
 
 Only add work when justified.
 
-### 158. PHASE 54 — FINAL DEFINITION OF DONE
+### 158. IMPLEMENTATION STEP 54 — FINAL DEFINITION OF DONE
 
 The project is complete only after:
 
@@ -2928,33 +2929,39 @@ It exists so I do not lose the project's reasoning.
 
 ### 159. DOCUMENT SOURCE OF TRUTH
 
-There is not one universal "highest priority" document.
-
-Each document owns a different domain.
+The project uses a defined document hierarchy. Each document has a specific role, and this MasterRef does not override those authorities.
 
 AGENTS.md
     ↓
-Agent behavior
-
-ARCHITECTURE.md
-    ↓
-System structure
+Agent behavior and project rules
 
 PLAN.md
     ↓
-Implementation sequence
+Authoritative investigation scope and phase order
+
+INVESTIGATION_METHOD.md
+    ↓
+Investigation methodology and evidence standards
+
+ARCHITECTURE.md
+    ↓
+Current proposed architecture, subject to investigation
+
+MasterRef.md
+    ↓
+Consolidated project reference
 
 INVESTIGATION.md
     ↓
-Research/evidence
+Original pre-MasterRef investigation and historical research/reference
 
 README.md
     ↓
-Public explanation
+Project overview and user-facing documentation
 
 PERSONAL KNOWLEDGE BASE
     ↓
-My complete understanding
+My complete project understanding, without overriding the hierarchy above
 
 ### 160. WHAT TO DO WHEN DOCUMENTS CONFLICT
 
@@ -3988,7 +3995,7 @@ The long-term model is:
            Porter                   Shizuku
 ```
 
-### 241. FINAL ARCHITECTURE DIAGRAM
+### 241. CURRENT PROPOSED ARCHITECTURE DIAGRAM
 
 ```
                            UNIFIED APPLICATION
@@ -4265,7 +4272,9 @@ See §61.
 
 This appendix collects the canonical diagrams already present in the knowledge base for quick architectural orientation. The detailed discussion remains in the main chapters.
 
-## D.1 Final Architecture
+## D.1 Current Proposed Architecture
+
+The diagrams in this appendix describe the current proposal only. They are not immutable and may be superseded by verified investigation findings and the subsequent Architecture Confirmation / Revision step.
 
 ```text
                            UNIFIED APPLICATION
@@ -4911,7 +4920,7 @@ The investigation covers Rootless execution, persistence, runtime recovery, and 
 
 ## J.4 Rootless Regression Boundary
 
-The implementation plan includes a dedicated Rootless regression phase after the Shizuku/backend work and before the common package/domain expansion. See §113 and the corresponding development phase.
+The implementation plan includes a dedicated Rootless regression phase after the Shizuku/backend work and before the common package/domain expansion. See §113 and the corresponding implementation step.
 
 ## J.5 Daemon/Service Distinction
 
@@ -5123,11 +5132,11 @@ Android compatibility cannot be assumed; the knowledge base specifically calls f
 
 # Appendix M — Implementation Cross-Reference
 
-This appendix maps the existing implementation phases to their documented scope. It does not add a new implementation plan.
+This appendix maps the existing implementation steps to their documented scope. It does not add a new implementation plan.
 
-## M.1 Phase Reference
+## M.1 Implementation Step Reference
 
-| Phase | Existing phase scope |
+| Implementation Step | Existing implementation scope |
 | --- | --- |
 | 0 | Baseline |
 | 1 | Source/License Audit |
@@ -5392,7 +5401,7 @@ The research rule is not to invent Porter or Shizuku APIs. Exact API names, perm
 
 ## P.6 Historical Decision Context
 
-The knowledge base deliberately preserves rejected approaches because they explain the shape of the current architecture. Major examples include rejecting a wholesale Shevery copy, rejecting a Shizuku-centered architecture, keeping ADB Modules distinct from Rootless Plugins, keeping `service.sh` distinct from Rootless daemon semantics, and refusing to treat catalog/source trust as automatic execution trust. Source: §165.
+The knowledge base deliberately preserves rejected approaches because they explain the shape of the current proposed architecture. Major examples include rejecting a wholesale Shevery copy, rejecting a Shizuku-centered architecture, keeping ADB Modules distinct from Rootless Plugins, keeping `service.sh` distinct from Rootless daemon semantics, and refusing to treat catalog/source trust as automatic execution trust. Source: §165.
 
 ## P.7 Research and Documentation Maintenance
 

@@ -51,7 +51,7 @@ A conceptual architecture is not automatically an existing architecture.
 
 2. Investigation Authority
 
-The investigation program is governed by three documents:
+The investigation program follows the project document hierarchy:
 
 AGENTS.md
     ↓
@@ -59,13 +59,29 @@ Agent/project rules
 
 PLAN.md
     ↓
-Investigation scope and phase checklist
+Authoritative investigation scope and phase order
+
+INVESTIGATION_METHOD.md
+    ↓
+Investigation methodology and evidence standards
+
+ARCHITECTURE.md
+    ↓
+Current proposed architecture, subject to investigation
+
+MasterRef.md
+    ↓
+Consolidated project reference
 
 INVESTIGATION.md
     ↓
-Research methodology and evidence standards
+Original pre-MasterRef investigation and historical research/reference
 
-"PLAN.md" is the authoritative checklist for investigation scope.
+README.md
+    ↓
+Project overview and user-facing documentation
+
+"PLAN.md" is the authoritative checklist for investigation scope and phase order. This document is the authoritative methodology and evidence-standard reference.
 
 Do not silently remove, skip, or replace investigation requirements.
 

@@ -2,7 +2,7 @@ Investigation
 
 1. Purpose
 
-This document records the research and findings that inform the ADB Modules project.
+This document preserves the original pre-MasterRef investigation and historical research/reference material for the ADB Modules project.
 
 It answers:
 
@@ -16,31 +16,27 @@ This document is a research record, not the architecture specification or implem
 
 ---
 
-2. Documentation Source of Truth
+2. Document Role and Historical Status
 
-The project uses separate documents for separate responsibilities.
+This document is the original pre-MasterRef investigation and historical research/reference material.
 
-Document| Authority
-"AGENTS.md"| Agent behavior, rules, constraints, and workflow
-"ARCHITECTURE.md"| System structure, boundaries, responsibilities, and architectural invariants
-"PLAN.md"| Implementation scope, sequencing, milestones, and completion criteria
-"INVESTIGATION.md"| Research findings, external-project behavior, evidence, and compatibility observations
-"README.md"| Public-facing project explanation
+It is not the current investigation methodology, it does not define the authoritative investigation phase order, and it does not override verified findings or the current proposed architecture.
 
-Each document is authoritative only within its own domain.
+The current project-document hierarchy is:
 
-A finding recorded here does not automatically change the architecture or implementation plan.
+| Document | Role |
+| --- | --- |
+| "AGENTS.md" | Agent behavior, rules, and project constraints |
+| "PLAN.md" | Authoritative investigation scope and phase order |
+| "INVESTIGATION_METHOD.md" | Investigation methodology and evidence standards |
+| "ARCHITECTURE.md" | Current proposed architecture |
+| "MasterRef.md" | Consolidated project reference |
+| "INVESTIGATION.md" | Original pre-MasterRef investigation and historical research/reference |
+| "README.md" | Project overview and user-facing documentation |
 
-When investigation reveals that the existing architecture or plan is incorrect:
+Historical findings recorded here may inform current investigations, but they must be re-verified when current decisions depend on them.
 
-1. Record the finding here.
-2. Determine whether the finding changes the architecture.
-3. If architecture changes, update "ARCHITECTURE.md".
-4. If implementation scope or ordering changes, update "PLAN.md".
-5. If agent behavior or guardrails need to change, update "AGENTS.md".
-6. Keep this document as the research record.
-
-Cross-document contradictions must never be silently resolved by choosing whichever statement is convenient.
+If a historical finding conflicts with verified current evidence, the verified finding governs the current project state. This document remains valuable as historical research and context.
 
 ---
 
@@ -91,9 +87,7 @@ The project already contains concepts for:
 
 This makes it a useful starting point rather than requiring an entirely new package-management application.
 
-Official repository:
-
-"Rootless Store repository" (https://reference-url-citation.invalid/0)
+Historical source reference: original URL was not preserved in this pre-MasterRef document; do not treat this placeholder as a verified source.
 
 ---
 
@@ -301,7 +295,7 @@ Shevery is the primary compatibility reference for the ADB Module package format
 
 Official repository:
 
-"Shevery repository" (https://reference-url-citation.invalid/1)
+Historical source reference: original URL was not preserved in this pre-MasterRef document; do not treat this placeholder as a verified source.
 
 Shevery is a modernized Shizuku-based Android application that includes an ADB Modules system.
 
@@ -356,11 +350,11 @@ The API documentation indicates that unsafe path forms such as absolute paths an
 
 Official guide:
 
-"Shevery ADB Modules Guide" (https://reference-url-citation.invalid/2)
+Historical source reference: original URL was not preserved in this pre-MasterRef document; do not treat this placeholder as a verified source.
 
 Official API reference:
 
-"Shevery ADB Modules API" (https://reference-url-citation.invalid/3)
+Historical source reference: original URL was not preserved in this pre-MasterRef document; do not treat this placeholder as a verified source.
 
 ---
 
@@ -1000,6 +994,26 @@ Agent behavior surrounds the entire process:
                     └───────┬───────┘
                             │
                             ▼
- INVESTIGATION → ARCHITECTURE → PLAN → IMPLEMENTATION
+ Historical workflow reference: this original investigation predates the current document hierarchy and must not be used as the current project workflow.
 
-"README.md" remains the public-facing explanation of the resulting project and is not an implementation source of truth.
+The current workflow is:
+
+Research
+↓
+Evidence Collection
+↓
+Investigation Report
+↓
+Verification / Audit
+↓
+Verified Findings
+↓
+MasterRef Audit
+↓
+MasterRef Incorporation
+↓
+Architecture Confirmation / Revision
+↓
+Application Development
+
+"README.md" remains the project overview and user-facing documentation.

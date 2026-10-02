@@ -1,3 +1,8 @@
+
+**Status: Current Proposed Architecture**
+
+This document describes the current architectural proposal. It is a hypothesis subject to the investigation program. Verified investigation findings may confirm, modify, replace, or invalidate portions of this architecture. It is not a final or immutable architecture.
+
 ADB Modules Project — Architecture
 
 1. Purpose
@@ -29,16 +34,18 @@ The project deliberately separates documentation responsibilities.
 
 Document| Authority
 "AGENTS.md"| Agent behavior, rules, constraints, and workflow
-"ARCHITECTURE.md"| System structure, boundaries, responsibilities, and architectural invariants
-"PLAN.md"| Implementation scope, sequencing, milestones, and completion criteria
-"INVESTIGATION.md"| Research findings, external-project behavior, evidence, and compatibility observations
-"README.md"| Public-facing project explanation
+"ARCHITECTURE.md"| Current proposed architecture
+"PLAN.md"| Authoritative investigation scope and phase order
+"INVESTIGATION_METHOD.md"| Investigation methodology and evidence standards
+"MasterRef.md"| Consolidated project reference
+"INVESTIGATION.md"| Original pre-MasterRef investigation and historical research/reference
+"README.md"| Project overview and user-facing documentation
 
 Each document is authoritative only within its assigned domain.
 
-Architecture authority
+Architecture status and scope
 
-"ARCHITECTURE.md" is authoritative for:
+"ARCHITECTURE.md" defines the current proposed architecture for:
 
 - system boundaries,
 - component responsibilities,
@@ -49,7 +56,7 @@ Architecture authority
 - runtime boundaries,
 - architectural invariants.
 
-It does not determine implementation order.
+These are proposed architectural statements, not immutable conclusions. Verified investigation findings may change them. The document does not determine investigation scope, evidence standards, or implementation order.
 
 ---
 
@@ -1747,9 +1754,9 @@ Agent behavior belongs in "AGENTS.md".
 
 ---
 
-71. Final Architecture
+71. Current Proposed Architecture
 
-The intended final structure is:
+The current proposed structure is subject to investigation and verification. It may be confirmed, modified, replaced, or invalidated by verified investigation findings. The current proposal is:
 
                          Unified Application
                                   │

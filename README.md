@@ -228,7 +228,7 @@ Phase 25 audits the completed findings against "MasterRef.md".
 
 Phase 26 incorporates verified findings into "MasterRef.md".
 
-Application development begins after the investigation program is complete.
+After Phase 26, the project performs Architecture Confirmation / Revision. This is a post-Phase-26 gate, not Phase 27. Application development begins only after that architecture confirmation/revision step.
 
 Investigation Method
 
@@ -244,11 +244,13 @@ Verification & Audit
     ↓
 Verified Findings
     ↓
+MasterRef Audit
+    ↓
 MasterRef Incorporation
     ↓
-Application Architecture
+Architecture Confirmation / Revision
     ↓
-Implementation
+Application Development
 
 The investigation distinguishes between:
 
@@ -274,8 +276,8 @@ Document| Purpose
 ""PLAN.md"" (PLAN.md)| Authoritative 27-phase investigation scope and order
 ""INVESTIGATION_METHOD.md"" (INVESTIGATION_METHOD.md)| Investigation methodology and evidence standards
 ""INVESTIGATION.md"" (INVESTIGATION.md)| Original pre-MasterRef investigation and historical research
-""ARCHITECTURE.md"" (ARCHITECTURE.md)| Current architectural direction
-""MasterRef.md"" (MasterRef.md)| Synthesized project knowledge and reference
+""ARCHITECTURE.md"" (ARCHITECTURE.md)| Current proposed architecture
+""MasterRef.md"" (MasterRef.md)| Consolidated project reference
 ""README.md"" (README.md)| Project overview and user-facing information
 
 Investigation artifacts are maintained in the ""investigations/"" (investigations/) directory.
@@ -308,11 +310,11 @@ This helps prevent assumptions or unverified claims from being silently incorpor
 
 Current Status
 
-Phase 0 — Investigation Infrastructure: Complete
+Phase 0 — Investigation Infrastructure: Pending / Restarting
 
-Phase 0 establishes the infrastructure required for the remaining investigation program.
+Phase 0 establishes the infrastructure required for the remaining investigation program. The project is restarting at Phase 0; it is not yet complete.
 
-The next phase is:
+The next phase after Phase 0 completion is:
 
 Phase 1 — Rootless Store Deep Investigation
 
