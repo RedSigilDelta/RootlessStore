@@ -310,13 +310,21 @@ This helps prevent assumptions or unverified claims from being silently incorpor
 
 Current Status
 
-Phase 0 — Investigation Infrastructure: Pending / Restarting
+Phase 0 — Investigation Infrastructure: Complete (2026-10-02)
+Phase 1 — Rootless Store Deep Investigation: Complete (2026-10-02)
+Phase 2 — Shevery ADB Module Compatibility Investigation: Complete (2026-10-02)
 
-Phase 0 establishes the infrastructure required for the remaining investigation program. The project is restarting at Phase 0; it is not yet complete.
+Phase 0 established the investigation infrastructure required by the remaining investigation program. Investigation artifacts, registers, and status tracking are maintained under "investigations/".
 
-The next phase after Phase 0 completion is:
+Phase 1 established the current implementation of Rootless Store from source: module architecture, persistence, the plugin contract and lifecycle, CodeBrick behaviour, and market transport. It verified that the plugin manifest is not validated, that the privilege tier is selected by a manifest field, that manifest data reaches an unquoted shell command line, and that the WebView grants privileged bridges to an origin chosen by plugin data. These are recorded as implementation findings in "investigations/phase-01/"; no verified finding has been incorporated into "MasterRef.md", which remains protected until Phase 26.
 
-Phase 1 — Rootless Store Deep Investigation
+Phase 2 established the actual ADB Module package contract by reading the reference implementation in source. It corrected a premise inherited from Phase 0: the format originated in Nightzuku in May 2026, was adopted by Shevery days later, and has no relationship to Porter, which has no module subsystem at all. It found that no format specification exists, that the two forks have already diverged silently, that only "id" is a required manifest field despite documentation naming six, and that the reference's own documentation contradicts its source on four points. These are recorded in "investigations/phase-02/"; no verified finding has been incorporated into "MasterRef.md", which remains protected until Phase 26.
+
+The authoritative program position is tracked in "investigations/STATUS.md"; the phase index is "investigations/INDEX.md".
+
+The next phase after Phase 2 completion is:
+
+Phase 3 — ADB Module Lifecycle Investigation
 
 Relationship to Upstream
 
