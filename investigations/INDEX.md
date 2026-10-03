@@ -4,7 +4,7 @@ One row per phase of the `PLAN.md` program (Phases 0–26). Phase order and name
 are verbatim from `PLAN.md` and must not be changed here.
 
 **Standard:** `investigations/METHOD.md`
-**Last updated:** 2026-10-02 (Phase 2)
+**Last updated:** 2026-10-02 (Phase 4)
 
 Status vocabulary: `Not Started | In Progress | Research Complete |
 Awaiting Verification | Audited | Complete | Blocked`
@@ -18,9 +18,9 @@ Awaiting Verification | Audited | Complete | Blocked`
 | 0 | Investigation Infrastructure | Complete | [REPORT](phase-00/REPORT.md) | 2026-10-02 | 2026-10-02 | Local repo + project docs (`L1`, `L2`) | U-001, U-002, U-003, U-004, U-005, U-006 | C-002 open; C-001 and C-004 retracted | Infrastructure only; no MasterRef content change recommended |
 | 1 | Rootless Store Deep Investigation | Complete | [REPORT](phase-01/REPORT.md) | 2026-10-02 | 2026-10-02 | Local repo source at `main` @ `4b35c36` (L1) + git history; no network sources needed | U-007, U-008, U-009, U-010, U-011 | C-005, C-006 open; C-007 refuted; C-008 corrected | 8 recommendations queued for Phase 25; **no MasterRef edit** |
 | 2 | Shevery ADB Module Compatibility Investigation | Complete | [REPORT](phase-02/REPORT.md) | 2026-10-02 | 2026-10-02 | Shevery @ `bfc55ce9` + Nightzuku @ `60a8feb6` (L1, cloned); Shevery docs (L2, 4 points contradicted) | U-012…U-018; U-003/U-005/U-006 **resolved** | C-002 resolved; C-009, C-010, C-011, C-012, C-013 open; C-005 quantified | 8 recommendations queued for Phase 25; **no MasterRef edit**. Premise correction: origin is Nightzuku, not Porter |
-| 3 | ADB Module Lifecycle | Not Started | — | — | — | — | — | — | — |
-| 4 | Porter Investigation | Not Started | — | — | — | — | — | — | — |
-| 5 | Shizuku Compatibility Investigation | Not Started | — | — | — | — | — | — | — |
+| 3 | ADB Module Lifecycle | Audited | [REPORT](phase-03/REPORT.md) | 2026-10-02 | — | Shevery @ `bfc55ce9` + Nightzuku @ `60a8feb6` + local @ `6df93ae` (L1, cloned) | U-019…U-024; U-009, U-011 **resolved** | C-014…C-018 open | 14 recommendations queued; **no MasterRef edit**. 14 CONTRADICTED/impact rows; linear state model found **insufficient** |
+| 4 | Porter Investigation | Complete | [REPORT](phase-04/REPORT.md) | 2026-10-02 | 2026-10-02 | Porter @ `2d88f34b` + **Porter SDK** `d4rken-org/porter-api` @ `2f280522` (tag `0.9.0`) + local @ `6df93ae` (L1, cloned) | U-025…U-030; **U-001 resolved**, U-019 half-resolved | C-019…C-021 open | 9 recommendations queued; **no MasterRef edit**. §7/§50 execution reclassification CONTRADICTED |
+| 5 | Shizuku Compatibility Investigation | Not Started | Next. Depends on 4 (U-001 now resolved) | — | — | — | — | — | — |
 | 6 | Execution Abstraction Investigation | Not Started | — | — | — | — | — | — | — |
 | 7 | Security Investigation | Not Started | — | — | — | — | — | — | — |
 | 8 | WebUI Investigation | Not Started | — | — | — | — | — | — | — |
@@ -99,6 +99,10 @@ Architecture Confirmation / Revision follows Phase 26 and is NOT Phase 27
 | `phase-01/evidence.md` | Phase 1 evidence ledger (42 verified findings) |
 | `phase-02/REPORT.md` | Phase 2 report (Shevery ADB Module compatibility) |
 | `phase-02/evidence.md` | Phase 2 evidence ledger (111 rows) |
+| `phase-03/REPORT.md` | Phase 3 report (ADB Module lifecycle, both layers) |
+| `phase-03/evidence.md` | Phase 3 evidence ledger (137 rows + 14 negative results + 6 seam records) |
+| `phase-04/REPORT.md` | Phase 4 report (Porter identity, SDK contract, backend architecture) |
+| `phase-04/evidence.md` | Phase 4 evidence ledger (144 rows + 8 negative results) |
 | `tools/check_register_mirrors.py` | Register mirror check — see §"Register mirror check" |
 
 ---
@@ -109,7 +113,7 @@ Architecture Confirmation / Revision follows Phase 26 and is NOT Phase 27
 
 | ID | Short description | Priority | Status | Owning phase |
 | --- | --- | --- | --- | --- |
-| U-001 | Exact Porter artifact, version, and API surface | Blocking (for backend design) | Open | 4 |
+| U-001 | Exact Porter artifact, version, and API surface | Blocking (for backend design) | **Resolved** (Phase 4) | — |
 | U-002 | Upstream Rootless Store repository state and license | Medium | Open | 18 |
 | U-003 | Reference Shevery commit for the ADB Module compatibility contract | High | **Resolved** (Phase 2) | — |
 | U-004 | Shizuku server implementation/version available to users | High | Open | 5 |
@@ -117,9 +121,9 @@ Architecture Confirmation / Revision follows Phase 26 and is NOT Phase 27
 | U-006 | Whether the existing "Magisk compatible plugin" workflow is or is not the ADB Module feature | High | **Resolved** (Phase 2); residual design question → 11 | 11 |
 | U-007 | Real-world impact of the database version reset 5 → 1 in commit `efab664` | High | Open | 14 |
 | U-008 | Source authentication, integrity, and update-discovery controls beyond the unauthenticated GET | High | Open | 12 |
-| U-009 | Whether the UI prevents executing a plugin whose `isEnabled` is false | Medium | Open | 3 |
+| U-009 | Whether the UI prevents executing a plugin whose `isEnabled` is false | Medium | **Resolved** (Phase 3) | — |
 | U-010 | What `illusioncube` is and what its presence in `data`/`application` implies | Medium | Open | 6 |
-| U-011 | Whether any non-default `PluginState` value is ever produced by any writer | High | Open | 3 |
+| U-011 | Whether any non-default `PluginState` value is ever produced by any writer | High | **Resolved** (Phase 3) | — |
 | U-012 | Whether Nightzuku and Shevery will converge or diverge further | Medium | Open | 21 |
 | U-013 | Whether any format-stability or deprecation policy exists or will be published | Medium | Open | 21 |
 | U-014 | Whether third-party module authors depend on the Shevery-only fallbacks (`run.sh`, `main.sh`, `exec.sh`, `late_start.sh`) | Medium | Open | 12 |
@@ -127,18 +131,39 @@ Architecture Confirmation / Revision follows Phase 26 and is NOT Phase 27
 | U-016 | `IShizukuService.newProcess` env-merge semantics — does the child inherit the server's environment? | Medium | Open | 5 |
 | U-017 | Whether any real module depends on `AXERON`/`AXERONVER` or the `su` shim behaviour | Low | Open | 12 |
 | U-018 | Intended script invocation form and working directory for this project | High | Open | 6 |
+| U-019 | Backend-neutral equivalent of the reference's "binder session" service-start trigger | High | **Resolved** (factual half, Phase 4); decision → 6, 9 | 6, 9 |
+| U-020 | Runtime behaviour of local recovery under PID reuse and Shizuku unavailability | High | Open | 14 |
+| U-021 | Whether real modules depend on the 120 s service bound or on directory replacement by update | Medium | Open | 12 |
+| U-022 | Whether GitHub release assets in practice carry a consumable digest | Medium | Open | 12 |
+| U-023 | Whether an interrupted `disable`-marker write can read as "enabled" | Low | Open | 11 |
+| U-024 | Whether the declared-but-uninvoked lifecycle APIs were a regressed feature or scaffolding | Low | Open | 6 |
+| U-025 | Runtime confirmation that `bindUserService` through Porter's bridge throws `UnsupportedOperationException` with no fallback | High | Open | 5 |
+| U-026 | Android 12–17 behaviour of Porter itself | Medium | Open | 10 |
+| U-027 | Whether `startProcess`/`exec` behave identically on the `PorterBackend.SHIZUKU` wire | Medium | Open | 5 |
+| U-028 | Whether the Porter Compatibility companion (`moe.shizuku.privileged.api`) interacts with this project's `dev.rikka.shizuku:provider` differently than documented | Medium | Open | 5 |
+| U-029 | Whether Porter SDK `0.x` API instability will affect this project, and at what migration cost | Medium | Open | 21 |
+| U-030 | Whether the SDK's internal shell-service `tag`/`version` strings are stable or implementation detail | Low | Open | 6 |
 
-Open unknowns: **15** (was 11). 15 are `Open`; 3 are `**Resolved** (Phase 2)`
-and are listed only to keep this mirror row-identical to the register. None is
-`Accepted-as-unknown`.
+Open unknowns: **19** (was 15). 19 are `Open`; 3 are `**Resolved**` (U-003,
+U-005, U-006 in Phase 2; U-009, U-011 in Phase 3 — five total, listed only
+where a mirror requires them). None is `Accepted-as-unknown`.
 
-**Resolved in Phase 2: U-003, U-005, U-006.** They are removed from this mirror
-and the §5 mirror in `STATUS.md` because a resolved entry is not an open unknown;
-their resolution blocks remain in `unknowns.md` per its maintenance rule 1
-(`INVESTIGATION_METHOD.md` §45).
+**Resolved in Phase 3: U-009, U-011.** Both were assigned to Phase 3 by Phase 1.
+U-009: the enabled flag is **not** enforced at execution — the execute button has
+no check and `ExecutePluginUseCase` never reads it (P3-A43, P3-D08). U-011:
+`PluginState` is **inert** — only `Great` is ever written, at three insert sites,
+and the DAO methods that would mutate it have no callers (P3-A113–P3-A115,
+P3-A137, P3-D13).
+
+**Added in Phase 3: U-019…U-024.** Six entries recording what source reading
+could not settle: backend-neutral session triggers (U-019), runtime recovery
+behaviour (U-020), ecosystem dependence on 120 s service bounds and on directory
+replacement (U-021), consumable release digests (U-022), torn `disable`-marker
+writes (U-023), and intent behind four declared-but-uninvoked lifecycle APIs
+(U-024).
 
 `Blocking` is a priority value, not a program gate (`METHOD.md` §13). U-001 is
-`Open` and blocks only Phases 6, 10, 22 and 23. It does not block Phase 3.
+`Open` and blocks only Phases 6, 10, 22 and 23. It did not block Phase 3.
 Full entries: [`unknowns.md`](unknowns.md).
 
 ### Contradictions
@@ -158,8 +183,17 @@ Full entries: [`unknowns.md`](unknowns.md).
 | C-011 | The official API doc contradicts its own source on four points | Material | **Unresolved** | — (informational) |
 | C-012 | Derived-from-Nightzuku provenance is unacknowledged on-platform | Minor | **Unresolved** | 18 |
 | C-013 | Package identity and release-asset naming changed across versions | Minor | **Unresolved** | 13 |
+| C-014 | `ARCHITECTURE.md`/`MasterRef.md` imply tracked module service processes; the reference tracks none | Material | **Unresolved** | 6, 9 |
+| C-015 | Documents require persisted process state to be distinguished from verified state; local code verifies nothing before killing | Material | **Unresolved** | 14, 7 |
+| C-016 | The forks enforce the same lifecycle by non-equivalent means and diverge on update tiers | Material | **Unresolved** (extends C-010) | 13, 21 |
+| C-017 | The reference's update path cannot fail safely, yet is presented as an ordinary operation | Minor | **Unresolved** | 13 |
+| C-018 | Update is destructive in the reference and silently merging locally; neither is safe | Minor | **Unresolved** | 13 |
+| C-019 | `ARCHITECTURE.md` §7/§50 classify the existing execution machinery as `KEEP`/`ADAPT` for Porter; Porter's bridge cannot run it | Material | **Unresolved** | 6 |
+| C-020 | Porter's dependency set coexists with upstream `provider`, but `shizuku-compat` would crash the app — and `shizuku-bridge` is offered for exactly this app's shape | Minor | **Unresolved** | 6 |
+| C-021 | Porter's docs describe `exec` as a plain command runner; it is implemented on a bound user service with per-connection caching | Minor | **Unresolved** | 6 |
 
-Open contradictions: **7** (C-005, C-006, C-009, C-010, C-011, C-012, C-013).
+Open contradictions: **12** (C-005, C-006, C-009, C-010, C-011, C-012, C-013,
+C-014, C-015, C-016, C-017, C-018).
 Blocking contradictions: **0** throughout. Retained for audit: 2 retracted
 (C-001, C-004), 1 refuted (C-007), 1 corrected (C-008), **1 resolved** (C-002).
 Full entries: [`contradictions.md`](contradictions.md).
@@ -252,4 +286,9 @@ register, truncated row, emphasis-only difference, legitimate omission).
 | Last modification to `MasterRef.md` by this program | None |
 | MasterRef audit | Deferred to Phase 25 |
 | MasterRef incorporation | Deferred to Phase 26 |
-| Recommended changes recorded so far | `phase-00/REPORT.md` §12 (infrastructure only); `phase-01/REPORT.md` §12 (8 recommendations — validation absence, the one hardened path, `ExecutionContext` overloading, backend divergence table, persistence history, declared-but-not-operational fields, WebUI bridge facts, absent `window.Shizuku`) |
+| Recommended changes recorded so far | `phase-00/REPORT.md` §12 (infrastructure only); `phase-01/REPORT.md` §12 (8 recommendations); `phase-02/REPORT.md` §12 (8 recommendations); `phase-03/REPORT.md` §12 (9 recommendations, P3-M01…P3-M09); `phase-04/REPORT.md` §12 (9 recommendations, P4-M01…P4-M09 — pinned Porter identity/version, no module subsystem, the user-service bridge limitation, Porter's better process control but absent safety bounds, the richer backend-state model, observable privilege, `java.lang.Process`-shaped handles, connection-availability trigger, capability bitmask) — service session model, boot limitation, install transactionality, update side effects, uninstall obligations, PID-verification gap, multi-dimensional state model, limit semantics, enablement enforcement point) |
+
+Phase 3 made **no edit** to `MasterRef.md`. `ARCHITECTURE.md` was likewise **not
+edited**: Phase 3 recorded that its §33, §36, §38 and §48 are contradicted by source
+(`phase-03/REPORT.md` §8), and left the revision itself to Architecture
+Confirmation / Revision after Phase 26. Recorded as C-014, C-015 and C-016.

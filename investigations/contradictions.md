@@ -7,7 +7,7 @@ Central register of significant contradictions between sources.
 **Method authority:** `INVESTIGATION_METHOD.md` §13 (Conflicting Sources), §14
 (Contradiction Record), §46 (Contradictions Register)
 **Opened by:** Phase 0 — Investigation Infrastructure
-**Last updated:** 2026-10-02 (Phase 2)
+**Last updated:** 2026-10-02 (Phase 4)
 
 Rules: a contradiction is never closed by deleting the losing claim, by
 preferring the newer-looking source, or by stopping discussion of it. Entries are
@@ -71,6 +71,66 @@ commit — but this project does not edit a third party's documentation, so the
 conflict itself persists for every future reader of that doc. Recording it keeps
 the correction visible instead of silently preferring one source
 (`INVESTIGATION_METHOD.md` §13).
+
+Phase 3 additions:
+
+| ID | Title | Severity | Status | Owning phase |
+| --- | --- | --- | --- | --- |
+| C-014 | `ARCHITECTURE.md`/`MasterRef.md` imply tracked module service processes; the reference tracks none | Material | **Unresolved** | 6, 9 |
+| C-015 | Documents require persisted process state to be distinguished from verified state; local code verifies nothing before killing | Material | **Unresolved** | 14, 7 |
+| C-016 | The forks enforce the same lifecycle by non-equivalent means and diverge on update tiers | Material | **Unresolved** (extends C-010) | 13, 21 |
+| C-017 | The reference's update path cannot fail safely, yet is presented as an ordinary operation | Minor | **Unresolved** | 13 |
+| C-018 | Update is destructive in the reference and silently merging locally; neither is safe | Minor | **Unresolved** | 13 |
+| C-019 | `ARCHITECTURE.md` §7/§50 classify the existing execution machinery as `KEEP`/`ADAPT` for Porter; Porter's bridge cannot run it | Material | **Unresolved** | 6 |
+| C-020 | Porter's dependency set coexists with upstream `provider`, but `shizuku-compat` would crash the app — and `shizuku-bridge` is offered for exactly this app's shape | Minor | **Unresolved** | 6 |
+| C-021 | Porter's docs describe `exec` as a plain command runner; it is implemented on a bound user service with per-connection caching | Minor | **Unresolved** | 6 |
+
+Open contradictions after Phase 3: **12** (C-005, C-006, C-009, C-010, C-011,
+C-012, C-013, C-014, C-015, C-016, C-017, C-018). C-002 resolved.
+Blocking contradictions: **0** throughout the program.
+
+C-016 is recorded as an **extension of C-010**, not a replacement. C-010 was about
+*how* the same numeric limits are enforced during extraction; C-016 is about the
+*lifecycle* the two forks implement around those limits — in particular that
+update discovery has three tiers in Shevery and two in Nightzuku, and that
+Nightzuku's model cannot even represent prop-driven update state (P3-A79,
+P3-A80). Both entries stay open; neither subsumes the other.
+
+C-014 and C-015 are contradictions between **this project's own documents** and
+**the code**, not between external sources. They are recorded here because
+`AGENTS.md` §17 requires the disagreement be preserved rather than quietly edited
+away, and because Phase 3's remit included "verify existing claims rather than
+assuming they are correct". Neither document was modified: `ARCHITECTURE.md` is
+the current proposal and Phase 3 only records that its §33/§36/§38 are contradicted
+by source, while `MasterRef.md` is protected until Phase 25/26.
+
+Phase 4 additions:
+
+| ID | Title | Severity | Status | Owning phase |
+| --- | --- | --- | --- | --- |
+| C-019 | `ARCHITECTURE.md` §7/§50 classify the existing execution machinery as `KEEP`/`ADAPT` for Porter; Porter's bridge cannot run it | Material | **Unresolved** | 6 |
+| C-020 | Porter's dependency set coexists with upstream `provider`, but `shizuku-compat` would crash the app — and `shizuku-bridge` is offered for exactly this app's shape | Minor | **Unresolved** | 6 |
+| C-021 | Porter's docs describe `exec` as a plain command runner; it is implemented on a bound user service with per-connection caching | Minor | **Unresolved** | 6 |
+
+Open contradictions after Phase 4: **15** (C-005, C-006, C-009, C-010, C-011,
+C-012, C-013, C-014, C-015, C-016, C-017, C-018, C-019, C-020, C-021).
+C-002 resolved. Blocking contradictions: **0** throughout the program.
+
+**C-019 is the most consequential contradiction the program has raised.** Phase 4
+established from primary source that Porter's Shizuku bridge throws
+`UnsupportedOperationException` for `bindUserService`, `peekUserService` and
+`unbindUserService` (`porter-api` `docs/api-reference.md:164`, tag `0.9.0`), while
+this project executes privileged work exclusively through `Shizuku.bindUserService`
+at 14 call sites. `ARCHITECTURE.md` §50 lists "execution contexts" and "privileged
+execution" under `ADAPT` — components whose concepts remain useful. For Porter that
+is understated: the code cannot run at all, so the classification for that backend is
+`REPLACE`.
+
+The contradiction is left **open**, not resolved, because reclassifying a component
+is an architecture decision (`INVESTIGATION_METHOD.md` §40, §53) and Phase 4's remit
+was to establish the evidence and record the conflict. Phase 6 owns it. Both documents
+were left unedited: `ARCHITECTURE.md` is the current proposal, and `MasterRef.md` is
+protected until Phase 25/26.
 
 ---
 
@@ -994,6 +1054,626 @@ continuing.
 Phase 13 (update/rollback, updater keying), Phase 12 (catalog trust — a renamed
 package identity is a supply-chain signal worth checking, not proof of anything).
 
+
+---
+
+## Contradiction C-014 — The project's documents imply tracked module service processes; the reference tracks none
+
+| Field | Value |
+| --- | --- |
+| Phase raised | 3 |
+| Raised on | 2026-10-02 |
+| Severity | Material |
+| Current status | **Unresolved** |
+| Owning phase | 6 — Execution Abstraction; 9 — Background Services |
+| Evidence | `phase-03/evidence.md` P3-A39, P3-A40, P3-A51, P3-A62, P3-A105 |
+
+### Claim A — the project's documents
+
+`ARCHITECTURE.md` §33 describes a "Service Runtime" with "Runtime Tracking" and
+"Recovery / Persistence" in its data flow, and §36 describes "Process Handle /
+Identity" and "Runtime State". `MasterRef.md` §31 says the reference behaviour
+"includes automatically running enabled services once per relevant Shizuku binder
+session", and §32 tells the reader to "Track runtime" and "Persist state".
+
+Both read as though a module service becomes a tracked, persisted process.
+
+### Claim B — the reference implementation
+
+Nothing in the module subsystem retains a process handle, a PID, or any execution
+record:
+
+- `setEnabled` writes or deletes a marker file and does nothing else; it kills
+  nothing (P3-A39).
+- A repository-wide search for `destroy()` / `kill(` under the module subsystem
+  returns exactly two hits: the 120-second script timeout, and the WebUI bridge's
+  own timeout. Neither is a service-lifecycle mechanism (P3-D05).
+- `service.sh` is bounded by the **same** 120-second `MAX_SCRIPT_SECONDS` as
+  `action.sh`, and a timeout yields synthetic exit code 124 (P3-A51).
+- There is no persisted execution record, PID or journal of any kind (P3-A105).
+
+So a module service is a bounded, fire-and-forget invocation that the host waits
+for and then forgets. It is closer to a cron entry than to a daemon, and closer to
+a Magisk `service.sh` **launcher** than to a supervising host.
+
+### Consequence
+
+There is **no `Running → Stopped` transition** for a module service in the
+reference contract. "Running" is not a state the reference can observe, and
+"Stopped" is not a transition it can perform. Consequently:
+
+- Disabling a module does not stop it (P3-A39).
+- Uninstalling a module does not stop it (P3-A95).
+- Nothing in the UI can honestly display "this service is running".
+
+This affects `MasterRef.md` §31/§32 and `ARCHITECTURE.md` §33/§36, which currently
+cannot both be right and the code.
+
+### Investigation performed
+
+`AdbModuleManager`, `AdbModule`, `ModuleSettings`, `ModulesScreen`,
+`ModuleWebViewActivity` read in full at `bfc55ce9`; the same subsystem read at
+`60a8feb6` and compared; the kill/destroy and execution-record searches run
+repository-wide and recorded as negative results P3-D03 and P3-D05.
+
+### Resolution
+
+**Unresolved.** The factual side is settled: the reference tracks nothing. What is
+*not* settled — and cannot be settled by Phase 3 — is what this project should do:
+
+- Matching the reference exactly means **no** process tracking for ADB Module
+  services, which is a weaker and less safe product than `ARCHITECTURE.md` §36
+  promises.
+- Diverging means `service.sh` gains supervision it was never designed for, which
+  risks breaking modules that assume the script is simply run once.
+
+`AGENTS.md` §24 forbids adopting one implementation's semantics as the
+architecture, and `INVESTIGATION_METHOD.md` §40 requires an explicit decision
+rather than a silent edit. Phase 3 records the conflict and makes no choice.
+Recorded as `P3-AR03` and `CONTRADICTED` in `phase-03/REPORT.md` §8.
+
+Interpretation adopted meanwhile: no artifact may state that the reference
+provides a tracked or supervising module service runtime.
+
+### Impact
+
+Phase 6 (execution handle and execution state model), Phase 9 (background
+services), Phase 14 (runtime recovery), Phase 22 (stress-testing multiple
+simultaneous executions), Phase 25 (`MasterRef.md` §31/§32 audit).
+
+---
+
+## Contradiction C-015 — Documents require verified process state; the local code verifies nothing before killing
+
+| Field | Value |
+| --- | --- |
+| Phase raised | 3 |
+| Raised on | 2026-10-02 |
+| Severity | Material |
+| Current status | **Unresolved** |
+| Owning phase | 14 — Runtime Recovery Investigation; 7 — Security |
+| Evidence | `phase-03/evidence.md` P3-A118, P3-A120, P3-A121, P3-A122, P3-A123 |
+
+### Claim A — the project's documents
+
+`ARCHITECTURE.md` §36 states: "The application must distinguish persisted process
+information from verified active process state." §38 says persistence "must not
+blindly claim that a process remains active". `MasterRef.md` §59 says a persisted
+PID "may become stale, reused, unavailable, or invalid" and therefore "runtime
+recovery must verify actual state."
+
+Both documents state the requirement as a rule of the system.
+
+### Claim B — the local implementation
+
+`RecoverPluginRuntimeStateUseCase` iterates every persisted execution row and, for
+each one, immediately issues a kill. There is no liveness probe, no `kill -0`, no
+`/proc/<pid>/cmdline` match against the plugin's entry point, and no start-time
+comparison to detect PID reuse (P3-A121). Recovery therefore **terminates rather
+than reconciles** (P3-A120).
+
+The two branches also have opposite failure semantics:
+
+- Non-ADB context: abort, disable, delete the row — unconditionally (P3-A119).
+- ADB context: abort, then disable and delete **only if the kill reported
+  success**. `abortPluginProcessByShizuku` returns `processAbortResult != null`,
+  which is `true` whenever the call was non-null even if the kill failed — and
+  `false` when Shizuku is absent (P3-A118). So with Shizuku unavailable the row
+  and the enabled flag both survive, and there is no retry (P3-A123).
+
+The kill itself is `kill -9 $pluginProcessPid` built by string interpolation into a
+shell command, with the PID typed `Int` but neither range-checked nor quoted
+(P3-A122).
+
+### Consequence
+
+A legitimately running plugin is killed on every app restart, and a stale row whose
+PID has been recycled kills an unrelated process. The documents describe the
+opposite: verification before action.
+
+Severity note: the **absence** of a check is `VERIFIED` from source. Whether a
+recycled PID is actually killed is a runtime fact and is **not** established — see
+U-020, which Phase 14 owns.
+
+### Investigation performed
+
+`RecoverPluginRuntimeStateUseCase`, `PluginExecutionGatewayImpl`,
+`PluginExecutionRepositoryImpl`, `PluginExecutionDao`, `PluginExecutionEntity`,
+`MainActivity` read at `6df93ae`; recovery-callers and PID-check searches run
+repository-wide and recorded as P3-D11 and P3-D12.
+
+### Resolution
+
+**Unresolved.** The static fact is settled and Phase 3 makes no claim beyond it.
+What Phase 14 must decide is the reconciliation contract: what "verified active"
+means operationally, which check is cheap enough to run at every app start, and
+what happens when the verification itself is inconclusive.
+
+Interpretation adopted meanwhile: `MasterRef.md` §59 and `ARCHITECTURE.md` §36 are
+recorded as **requirements**, not as descriptions of current behaviour. Recorded
+as `P3-AR08` and `CONTRADICTED` in `phase-03/REPORT.md` §8, and as security finding
+`P3-S11`.
+
+### Impact
+
+Phase 14 (runtime recovery — owns it), Phase 7 (privilege-boundary enforcement),
+Phase 15 (diagnostics — an unexplained kill is currently untraceable), Phase 25
+(`MasterRef.md` §59/§62 audit).
+
+---
+
+## Contradiction C-016 — The forks implement the same lifecycle by non-equivalent means (extends C-010)
+
+| Field | Value |
+| --- | --- |
+| Phase raised | 3 |
+| Raised on | 2026-10-02 |
+| Severity | Material |
+| Current status | **Unresolved** |
+| Owning phase | 13 — Updates and Rollback; 21 — Interoperability |
+| Evidence | `phase-03/evidence.md` P3-A79, P3-A80, P3-A126, P3-A127; `phase-02/evidence.md` P2-A42, P2-A43 |
+
+### Claim A — Shevery @ `bfc55ce9`
+
+Update discovery has three tiers, in order: (1) `updateJson` from `module.prop`,
+(2) a catalog match on `moduleId` (case-insensitive), (3) `url`/`repo` prop parsed
+for a GitHub repository, then the Releases API. A tier only short-circuits if it
+*finds* an update, so an `updateJson` reporting "no update" falls through to the
+next tier. `AdbModule` carries `url`, `updateJson` and `updateInfo` fields
+(P3-A79, P3-A80 — the Nightzuku side).
+
+Its `BootCompleteReceiver` gates ADB boot-start on `getStartOnBootAdb()` plus
+several device conditions, requires `AdbArm` (which accepts either
+`WRITE_SECURE_SETTINGS` or Device Owner), requires `NEARBY_WIFI_DEVICES` on API 33+,
+requires `ACCESS_LOCAL_NETWORK` on API 37 (Android 17), and defers on a pre-S
+keyguard with a 120-second timeout (P3-A126).
+
+### Claim B — Nightzuku @ `60a8feb6`
+
+Update discovery has two tiers: `updateJson`, then a fallback that **assumes the
+repository name equals `module.id`** (`repoName = module.id`, P3-A79). Its
+`AdbModule` has no `url`, `updateJson` or `updateInfo` field at all, so
+prop-driven update state is not representable in its model (P3-A80).
+
+Its `BootCompleteReceiver` gates ADB boot-start on `WRITE_SECURE_SETTINGS` **and**
+`lastLaunchMode == ADB`, with no `AdbArm` Device-Owner fallback, no pre-S keyguard
+deferral and no Android-17 local-network gate (P3-A127).
+
+### Consequence
+
+Two modules with identical `module.prop` content can behave differently: one
+auto-updates in Shevery and not in Nightzuku, because the catalog tier and the
+`url`/`repo` tier exist only in Shevery. Two devices with the same ROM can fail to
+auto-start the server on boot for reasons specific to their fork.
+
+This is the lifecycle-level counterpart of C-010, which covers extraction limits.
+Both remain open; C-016 does not subsume C-010.
+
+### Investigation performed
+
+Both `module/update/` trees read at their pins and the three-tier / two-tier
+precedence compared; both `AdbModule` data classes compared field by field; both
+`BootCompleteReceiver` files diffed in full.
+
+### Resolution
+
+**Unresolved.** Both forks are internally consistent. The portable intersection is
+the defensible target — the same framing Phase 2 reached for the package format
+(§8.5 of the Phase 2 report) — but adopting it is a decision, not an observation.
+
+Version caveat recorded rather than hidden: the Nightzuku pin (`60a8feb6`,
+2026-07-20) is roughly 2.5 months older than the Shevery pin (`bfc55ce9`,
+2026-10-02). The divergence is therefore established *at these two pins*; this
+entry does not establish which fork moved, or whether Nightzuku has since
+converged. U-012 already tracks the direction-of-travel question.
+
+Interpretation adopted meanwhile: no artifact may state "Shevery and Nightzuku
+implement the same lifecycle", nor "Nightzuku supports `updateJson` modules from
+`url`/`repo`".
+
+### Impact
+
+Phase 13 (update discovery and keying), Phase 21 (cross-fork interoperability and
+divergence monitoring), Phase 10 (Android 17 boot behaviour differs by fork).
+
+---
+
+## Contradiction C-017 — The reference's update path cannot fail safely, yet is presented as an ordinary operation
+
+| Field | Value |
+| --- | --- |
+| Phase raised | 3 |
+| Raised on | 2026-10-02 |
+| Severity | Minor |
+| Current status | **Unresolved** |
+| Owning phase | 13 — Updates and Rollback |
+| Evidence | `phase-03/evidence.md` P3-A23, P3-A24, P3-A83, P3-A87, P3-A90 |
+
+### Claim A — the documentation's framing
+
+Update is presented as a routine maintenance operation: a frequency setting
+(`manual`/`daily`/`weekly`), a three-tier discovery chain, and a `ModuleActionResult`
+carrying `version`, `versionCode`, `zipUrl` and `changelog`. The UI treats a
+positive `UpdateResult` as an install offer.
+
+### Claim B — the implementation
+
+Every one of those affordances sits on top of an operation that cannot fail safely:
+
+- Install deletes the target directory **before** attempting the rename, and
+  verifies readability only **after** the rename (P3-A23). An update that fails at
+  either point leaves the module **uninstalled** (P3-A24).
+- There is no rollback artefact of any kind: no previous version retained, no
+  backup, no history (P3-A90).
+- Any exception during update discovery is caught and returned as
+  `hasUpdate = false` (P3-A83), so a broken endpoint, a rate-limited API and a
+  genuinely current module are indistinguishable to the user.
+- Because the `disable` marker lives inside the replaced directory, updating a
+  disabled module silently re-enables it (P3-A87).
+
+### Consequence
+
+An update is the highest-risk operation in the reference subsystem, and it is the
+one with the least user-visible failure signalling. A user who clicks "update" on a
+broken release can end up with no module and no error, and their remedy is to find
+and reinstall the previous ZIP themselves.
+
+### Investigation performed
+
+`ModuleInstaller.installModule` traced into `AdbModuleManager.install`;
+`UpdateChecker.checkUpdate` read in full including its catch block; `ModulesScreen`
+update affordance traced to the `UpdateResult` consumer; `setEnabled` and
+`readModule` cross-read for the marker-file consequence.
+
+### Resolution
+
+**Unresolved.** Phase 3 can establish that the behaviour is defective; it cannot
+decide the replacement, because that is an architecture and product decision
+(`INVESTIGATION_METHOD.md` §40, §53 — a research finding is not an automatic
+implementation decision).
+
+Interpretation adopted meanwhile: source governs. The reference's update behaviour
+is a **defect**, not a compatibility requirement, and this project must not copy it
+merely because it is the reference. Recorded as `P3-AR12` and `P3-S02` in
+`phase-03/REPORT.md`.
+
+### Impact
+
+Phase 13 (owns the fix), Phase 7 (update as a supply-chain attack surface),
+Phase 15 (the failure is currently invisible — error classification), Phase 25
+(`MasterRef.md` §74 audit).
+
+---
+
+## Contradiction C-018 — Update is destructive in the reference and silently merging locally; neither is safe
+
+| Field | Value |
+| --- | --- |
+| Phase raised | 3 |
+| Raised on | 2026-10-02 |
+| Severity | Minor |
+| Current status | **Unresolved** |
+| Owning phase | 13 — Updates and Rollback |
+| Evidence | `phase-03/evidence.md` P3-A86, P3-A87, P3-A93, P3-A94 |
+
+### Claim A — the reference
+
+Update replaces the module directory wholesale: extract to staging, delete the
+target, rename. Files absent from the new archive are destroyed, including `logs/`,
+the `disable` marker, and any module-written state (P3-A86, P3-A87).
+
+Failure mode: **the module is gone.**
+
+### Claim B — this repository
+
+Re-installing over an existing `pluginPackageName` `mkdirs()` the target and
+overwrites files in place. There is no staging, no delete and no rollback
+(P3-A93). A partially-applied install leaves a **mixture** of old and new files in
+one directory with no way to tell them apart, and the database is updated anyway
+because `InstallPluginUseCase` still runs `addPlugin` / `registerPluginStatus` after
+extraction "succeeds" (P3-A94).
+
+Failure mode: **the module is silently corrupt.**
+
+### Consequence
+
+The two failure modes are opposite and both are unacceptable, so the project cannot
+resolve this by picking one implementation. It needs a third behaviour — staged,
+validated, atomic replacement with a retained previous version — which is a Phase 13
+design task.
+
+The local path is the more dangerous of the two in practice: a corrupt directory
+looks installed and behaves unpredictably, whereas a missing directory is at least
+visibly missing.
+
+### Investigation performed
+
+Local `unzipFromFile` / `unzipFromUri` / `InstallPluginUseCase` /
+`InstallPluginFromMarketUseCase` read at `6df93ae`; reference `install` read at
+`bfc55ce9`; the two failure modes contrasted.
+
+### Resolution
+
+**Unresolved.** Recorded so Phase 13 starts from a stated problem rather than from
+the assumption that one fork's behaviour is the contract.
+
+Interpretation adopted meanwhile: neither implementation's update semantics may be
+cited as the compatibility target. This is an explicit instance of Phase 2's
+§8.5 "portable intersection" framing applied to lifecycle rather than format.
+
+### Impact
+
+Phase 13 (owns the fix), Phase 11 (storage layout must accommodate staging and a
+retained previous version), Phase 20 (reliability: partial install), Phase 25
+(`MasterRef.md` §73/§74 audit).
+
+
+---
+
+## Contradiction C-019 — The architecture classifies the execution machinery as `ADAPT`, but Porter's bridge cannot run it at all
+
+| Field | Value |
+| --- | --- |
+| Phase raised | 4 |
+| Raised on | 2026-10-02 |
+| Severity | Material |
+| Current status | **Unresolved** |
+| Owning phase | 6 — Execution Abstraction Investigation |
+| Evidence | `phase-04/evidence.md` P4-A126, P4-A127, P4-A128, P4-A129, P4-A130, P4-A132 |
+
+### Claim A — `ARCHITECTURE.md`
+
+§50 classifies Rootless components into `KEEP` / `ADAPT` / `EXTEND` / `REFACTOR` /
+`REPLACE`. §7 says the architecture "should reuse those systems when their semantics
+are compatible", and §50 lists under `ADAPT` — "components whose concepts remain
+useful but need backend/package changes":
+
+- execution contexts,
+- WebUI,
+- **privileged execution**,
+- plugin installation.
+
+### Claim B — the Porter SDK's own contract
+
+`porter-api` at tag `0.9.0`, `docs/api-reference.md:164`:
+
+> User services (`bindUserService`, `peekUserService`, `unbindUserService`) and the
+> manager-only calls throw `UnsupportedOperationException`.
+
+`docs/developers.md:358` restates it: "Upstream's user services do not work through the
+bridge; use Porter's own."
+
+### Claim C — what this project actually does
+
+`ShizukuUserServiceGatewayImpl.startShizukuUserService()` calls
+`Shizuku.bindUserService(args, connection)` with `.tag("shell_service").version(6)
+.daemon(true)`, and **14 call sites** obtain that service through
+`findShizukuUserService()`. Its privileged logic is its own AIDL
+(`IShellService.aidl`, `IShellCallback.aidl`) hosted by `ShizukuEndpointTemplate`
+**inside that user-service process**.
+
+### Consequence
+
+None of that code can execute on Porter. Not "needs changes" — it throws before it
+runs. Concretely, on the Porter backend these become unavailable until rewritten
+against `connection.userService(UserServiceArgs(...))` and
+`connection.exec`/`startProcess`:
+
+- plugin execution via `executePluginWithoutEnvironmentByShizuku`
+- shell-plugin install, uninstall and export
+- the CPU and network status data sources
+- daemon-style plugin persistence keyed on a bound user service
+
+`ADAPT` — "concepts remain useful but need backend/package changes" — understates
+this. For the Porter backend the honest classification is `REPLACE`.
+
+Note what is **not** in conflict: the dependency set. An app keeping upstream's
+`dev.rikka.shizuku:api` and `:provider` "can use this SDK for Porter alone"
+(P4-A132), and both sides speak Shizuku client API 13. The build stays valid; the
+**calls** must change. That asymmetry is why the contradiction is about
+architecture rather than packaging.
+
+### Investigation performed
+
+`porter-api` cloned and `docs/api-reference.md` read in full (179 lines);
+`docs/developers.md` read in full (392 lines); `ShizukuUserServiceGatewayImpl.kt`,
+both local AIDL files and `ShizukuEndpointTemplate.kt` read; all
+`findShizukuUserService()` call sites enumerated across `application/` and `data/`.
+
+### Resolution
+
+**Unresolved.** The evidence is settled; the decision is not. Reclassifying a
+component in the architecture is an explicit architecture decision
+(`INVESTIGATION_METHOD.md` §40 — no silent corrections; §53 — a finding is not an
+automatic implementation decision). Phase 4 established the conflict. Phase 6 owns
+the reclassification, because Phase 6 owns the abstraction the reimplementation is an
+instance of.
+
+Interpretation adopted meanwhile: no artifact may state that the project's existing
+execution code is `ADAPT`-compatible with Porter, or that Porter is a drop-in
+replacement for the Shizuku backend. Recorded as `CONTRADICTED` (P4-AR02) in
+`phase-04/REPORT.md` §8.
+
+### Impact
+
+Phase 6 (owns the fix), Phase 17 (test matrix), Phase 22 (stress-testing the
+replacement), Phase 25 (`ARCHITECTURE.md` §7/§50 and `MasterRef.md` §7 audit).
+
+---
+
+## Contradiction C-020 — `shizuku-bridge` is offered for this app's shape, and `shizuku-compat` would crash it
+
+| Field | Value |
+| --- | --- |
+| Phase raised | 4 |
+| Raised on | 2026-10-02 |
+| Severity | Minor |
+| Current status | **Unresolved** |
+| Owning phase | 6 — Execution Abstraction Investigation (with Phase 17) |
+| Evidence | `phase-04/evidence.md` P4-A131, P4-A132, P4-A135, P4-A04 |
+
+### Claim A — Porter's documentation
+
+`docs/developers.md:337-343` offers `shizuku-bridge` for exactly this situation:
+
+> Code written against upstream's `dev.rikka.shizuku:api`, including libraries built on
+> it, can run on Porter unchanged through `shizuku-bridge`. It brings `sdk`,
+> `sdk-extras` and `dev.rikka.shizuku:api`.
+
+and `docs/developers.md:330-333` offers the native alternative:
+
+> An app that keeps upstream's `dev.rikka.shizuku:api` and `:provider`, for example
+> for a library built on them, can use this SDK for Porter alone. Leave out
+> `shizuku-compat` and keep upstream's `ShizukuProvider`.
+
+### Claim B — the same documentation's hard constraint
+
+`docs/developers.md:316-320`:
+
+> Declaring that provider without `moe.shizuku.api.BinderContainer` on the
+> classpath, which `shizuku-compat` ships, crashes your app on launch, whether or not
+> Porter or Shizuku is installed. `dev.rikka.shizuku:provider` ships the same class,
+> so **the two cannot both be in one app**, including through another library.
+
+### Claim C — this project
+
+It depends on `dev.rikka.shizuku:api` and `:provider` **13.1.5**, and is written
+against upstream's `Shizuku` API — the exact shape `shizuku-bridge` targets.
+
+### Consequence
+
+There is a build-configuration trap with no safe default:
+
+- Adding `shizuku-compat` alongside the existing `provider` **crashes the app on
+  launch**, unconditionally.
+- Adding `shizuku-bridge` pulls in a Porter connection path that runs the app's
+  upstream-API code against Porter — but that path cannot carry this project's
+  user services (C-019), so it would only partially work.
+- Adding the plain SDK (`sdk` / `sdk-extras`) alongside the existing `provider` is
+  documented as safe.
+
+The three options are not equivalent, and the documentation offers all three without
+ranking them for an app that keeps `provider`. "Using this SDK for Porter alone"
+requires reading three separate paragraphs to establish.
+
+### Investigation performed
+
+`docs/developers.md` read in full; `docs/api-reference.md` bridge section read in
+full; the project's `gradle/libs.versions.toml` Shizuku coordinates confirmed at
+13.1.5; the collision claim cross-checked against the manifest snippet Porter's own
+docs prescribe.
+
+### Resolution
+
+**Unresolved.** Which artifact set this project should ship is an architecture and
+build decision for Phase 6. Phase 4 records the hazard so a later phase does not
+discover it as a launch crash.
+
+Interpretation adopted meanwhile: no artifact may add `shizuku-compat` to this
+project's dependencies. Any Porter integration must either use `sdk`/`sdk-extras`
+with the existing `provider`, or use `shizuku-bridge` and accept C-019's limits.
+
+### Impact
+
+Phase 6 (owns the choice), Phase 17 (a build-matrix test should assert the app
+launches with each dependency set), Phase 25 (`ARCHITECTURE.md` §59 audit).
+
+---
+
+## Contradiction C-021 — `exec` is documented as a command runner but implemented as a user service
+
+| Field | Value |
+| --- | --- |
+| Phase raised | 4 |
+| Raised on | 2026-10-02 |
+| Severity | Minor |
+| Current status | **Unresolved** |
+| Owning phase | 6 — Execution Abstraction Investigation |
+| Evidence | `phase-04/evidence.md` P4-A45, P4-A54, P4-A55, P4-A56, P4-A65, P4-A133 |
+
+### Claim A — the documentation
+
+`docs/developers.md:142-149` presents `exec` as a direct primitive:
+
+> `sdk-extras` runs a command at Porter's identity and returns its exit code and
+> output:
+> ```kotlin
+> val result = connection.exec("sh", "-c", "pm list packages -3")
+> ```
+
+There is nothing in that section about a service, a binding, or startup cost. The
+implication is that `exec` is a round trip to the server.
+
+### Claim B — the implementation
+
+`PorterShell.kt` implements `exec` on top of an SDK-managed user service:
+
+- `start()` calls `ShellCalls.binding(this).service(this)` before every command
+  (P4-A54);
+- the binding is `userService(UserServiceArgs(componentName = PorterShellService,
+  processNameSuffix = "porter_shell", tag = "eu.darken.porter.sdk.extras.shell",
+  version = 2))` (P4-A54);
+- the binding is cached per `PorterConnection` in a `WeakHashMap`, so it is created on
+  first use and reused after (P4-A55);
+- "One binding for every call, because a Shizuku server older than 13.4 keeps each
+  binding it was given until the app's process dies" (P4-A56).
+
+The SDK's own API reference is more candid than the developer guide: "The first
+`newProcess`, and the first after the shell service died, also waits for that
+service's process to start."
+
+### Consequence
+
+`exec` is not free and not synchronous-with-the-server. On a cold connection, the
+first command pays for starting a separate process at the server's identity, and the
+cost recurs whenever that service dies or the connection is replaced. A design that
+treats `exec` as a cheap per-call round trip will be surprised by latency spikes at
+the moments that matter most — first action after connection, first action after a
+Porter restart.
+
+The secondary point matters for the backend abstraction: because `exec` is a user
+service, the "user service" capability cannot be treated as orthogonal to the "shell
+execution" capability. Porter couples them.
+
+### Investigation performed
+
+`PorterShell.kt` read in full (196 lines) including `ShellCalls`, `ShellBinding` and
+`start()`; `PorterShellProcess.kt` read in full; both documentation sections read.
+
+### Resolution
+
+**Unresolved.** Source governs — `exec` is a user-service-backed operation, and the
+documentation's framing understates the mechanism. Whether this project's backend
+contract must model that coupling is a Phase 6 decision.
+
+Interpretation adopted meanwhile: no artifact may describe Porter `exec` as a direct
+server round trip, and the Porter adapter must warm the shell service rather than
+assume first-call latency.
+
+### Impact
+
+Phase 6 (capability modelling, `P4-AR05`/`P4-AR06`), Phase 19 (performance — first-call
+latency is a measurable cost), Phase 25 (`MasterRef.md` §42 audit).
 
 ---
 

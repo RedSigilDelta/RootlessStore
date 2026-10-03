@@ -77,7 +77,7 @@ They are the foundation of Phase 1 and the baseline for later phases.
 | Repository URL | `https://github.com/RedSigilDelta/RootlessStore.git` |
 | Local path | `/mnt/sdcard/Git/RootlessStore` |
 | Branch | `main` |
-| Commit checked | `4b35c36b7b2a7ec810850a29edaec1ea0f5840ba` |
+| Commit checked | `4b35c36b7b2a7ec810850a29edaec1ea0f5840ba` (Phases 0–2); `6df93ae8d2c3dbb84b461b4eecb0c7f65de8a5b2` (Phase 3) |
 | Commit date | 2026-10-02 |
 | Application version | `versionName 2.3.1`, `versionCode 2` (`app/build.gradle.kts`) |
 | License | AGPL-3.0 (`LICENSE`) |
@@ -106,6 +106,23 @@ conclusion.
 Reliability level: **L1 — Primary Implementation Evidence (historical)**.
 These revisions are labelled `Historical` per `AGENTS.md` §33. Behaviour observed
 at them must not be stated as current behaviour.
+
+#### S-001c — Revision advance recorded in Phase 3
+
+Phase 3 re-pinned this repository from `4b35c36` to `6df93ae` before reading any
+lifecycle source, so the pin it cites is the commit actually on disk.
+
+| Field | Value |
+| --- | --- |
+| Commit | `6df93ae8d2c3dbb84b461b4eecb0c7f65de8a5b2`, subject `phase 2` |
+| Files changed vs `4b35c36` | `README.md` and `investigations/**` only — 25 paths |
+| Production source changed | **None.** `git diff --name-only 4b35c36 6df93ae` returns no `.kt`, `.kts`, `.xml`, or resource path |
+| Effect on Phase 1 findings | None for currency. Phase 1's local findings remain valid at `6df93ae` |
+| Reliability | L1 |
+
+Recorded because `INVESTIGATION_METHOD.md` §8 requires version context on every
+version-sensitive claim, and a reader comparing Phase 1's pin with Phase 3's would
+otherwise see an unexplained change.
 
 ### S-001b — Subagent research reports used as leads only
 
@@ -411,6 +428,130 @@ specific commits and file paths.
 | Rejected | `uptodown.com`, `apkmirror.com`, and similar store mirrors |
 | Reason | Repackaged binaries of unverified provenance; inspecting a repackaged artefact is weaker evidence than the public repository at a pinned commit |
 | Also not used | Search-result snippets as evidence for any claim (`INVESTIGATION_METHOD.md` §7 — leads only) |
+
+### S-215 — Shevery module lifecycle and host-integration surface
+
+| Field | Value |
+| --- | --- |
+| Repository | `https://github.com/HmnDev-Tech/shevery` |
+| Commit | `bfc55ce9c8898043f1a5c4896be276d154d08243` |
+| Local clone | `/tmp/shevery` (detached HEAD at the pin) |
+| Date checked | 2026-10-02 |
+| Files read in full | `module/AdbModule.kt`, `module/AdbModuleManager.kt`, `module/ModuleSettings.kt`, `module/ModulesScreen.kt`, `module/ModuleWebViewActivity.kt`, `module/ModuleJsBridge.kt`, `module/ModuleCommandReview.kt`, `module/update/UpdateChecker.kt`, `module/update/ModuleInstaller.kt`, `module/update/SourceZipBuilder.kt`, `module/update/UpdateResult.kt`, `module/discovery/ModuleValidator.kt`, `module/discovery/ModuleDiscoveryManager.kt`, `module/discovery/DiscoveryCache.kt`, `module/discovery/RateLimitTracker.kt`, `home/HomeActivity.kt` (lifecycle-relevant regions), `receiver/BootCompleteReceiver.kt` |
+| Extends | S-201 (which covered the six-file format surface) |
+| Reliability | **L1** — source read directly |
+| Evidence | P3-A01–P3-A131, P3-C01–P3-C14, P3-S01–P3-S09 |
+| Note | Same commit as Phase 2, so S-201 and S-215 describe the same code and are directly comparable |
+
+### S-216 — Nightzuku module lifecycle, update and boot surface
+
+| Field | Value |
+| --- | --- |
+| Repository | `https://github.com/kerneldroid/Nightzuku` |
+| Commit | `60a8feb65d1a9c95692624222ef26afb3063b9d3` |
+| Local clone | `/tmp/nightzuku` (detached HEAD at the pin) |
+| Date checked | 2026-10-02 |
+| Files read in full | `module/AdbModule.kt`, `module/AdbModuleManager.kt`, `module/ModuleSettings.kt`, `module/update/UpdateChecker.kt`, `module/update/ModuleInstaller.kt`, `receiver/BootCompleteReceiver.kt` (diffed against S-215's counterpart) |
+| Extends | S-202 |
+| Reliability | **L1** |
+| Evidence | P3-A07, P3-A16, P3-A79, P3-A80, P3-A126, P3-A127 |
+| Currency caveat | Pin is 2026-07-20, roughly 2.5 months older than the Shevery pin. Divergence rows establish divergence **at these two pins** and do not establish which fork moved. U-012 tracks direction of travel |
+
+### S-217 — Local lifecycle, execution, storage and persistence surface
+
+| Field | Value |
+| --- | --- |
+| Repository | `https://github.com/RedSigilDelta/RootlessStore.git` |
+| Commit | `6df93ae8d2c3dbb84b461b4eecb0c7f65de8a5b2` |
+| Local path | `/mnt/sdcard/Git/RootlessStore` |
+| Date checked | 2026-10-02 |
+| Files read in full | `application/…/plugin/{InstallPluginUseCase, InstallPluginFromMarketUseCase, InstallShellPluginUseCase, UninstallPluginUseCase, EnablePluginUseCase, DisablePluginUseCase, AbortPluginProcessUseCase, ObservePluginStatusUseCase}.kt`, `application/…/execute/{ExecutePluginUseCase, ExecutePluginByShizukuUseCase}.kt`, `application/…/runtime/RecoverPluginRuntimeStateUseCase.kt`, `application/…/codebrick/{ExecuteCodeBrickUseCase, InstallDaemonPluginFromCodeBrickUseCase, DeleteCodeBrickUseCase}.kt`, `data/…/plugin/{gateway/PluginGatewayImpl, repository/PluginRepositoryImpl, repository/PluginStatusRepositoryImpl, database/PluginStatusDao, database/PluginStatusEntity, mapper/PluginMapper}.kt`, `data/…/execution/{gateway/PluginExecutionGatewayImpl, repository/PluginExecutionRepositoryImpl, database/PluginExecutionDao, database/PluginExecutionEntity, mapper/PluginExecutionMapper}.kt`, `data/…/fileSystem/gateway/AndroidFileSystemCapabilityGatewayImpl.kt`, `data/…/monitor/PluginProcessMonitor.kt`, `domain/…/plugin/{manifest/PluginManifest, manifest/MagiskProp, model/PluginState, model/PluginStatus, model/PluginRunModel}.kt`, `ui/…/screens/PluginScreen.kt`, `app/…/MainActivity.kt` |
+| Extends | S-001 |
+| Reliability | **L1** |
+| Evidence | P3-A13–P3-A20, P3-A30–P3-A35, P3-A41–P3-A58, P3-A70, P3-A71, P3-A77, P3-A89, P3-A93, P3-A94, P3-A100–P3-A123, P3-A129, P3-A130, P3-A134–P3-A137, P3-S10–P3-S15 |
+| Negative results | P3-D01–P3-D13 |
+
+### S-218 — Absence of a device or emulator as an experimental substrate
+
+| Field | Value |
+| --- | --- |
+| Type | Environment limitation, recorded so it is not mistaken for an omission |
+| Finding | No Android device, emulator, or instrumented-test run was available in the environment where Phase 3 was conducted |
+| Consequence | `INVESTIGATION_METHOD.md` §10 requires device, manufacturer/model, Android version, app version, dependency versions, backend, configuration, permissions, trust state, network state, battery state, procedure, expected result, observed result, logs and limitations for any experimental finding. None could be supplied, so **no experiment was performed** |
+| Affected | `PLAN.md` Phase 3 items 14, 15 and 16 (recorded `Partial (source-read only)`), and the Android-version question in `phase-03/REPORT.md` Appendix B |
+| Registered as | U-019, U-020, U-023 — each naming the device test that would resolve it |
+| Reliability | L1 for the *absence*; **not** a source for any behavioural claim |
+
+
+### S-301 — Porter application, pinned commit
+
+| Field | Value |
+| --- | --- |
+| Repository | `https://github.com/d4rken-org/porter` |
+| Commit | `2d88f34bc348552b7fb22eb73ccaba5b9922cce5` (2026-10-02) |
+| Local clone | `/tmp/porter`, detached HEAD at the pin |
+| Application ID | `eu.darken.porter` |
+| Version | `0.8.0-rc0`, versionCode `800000` (`VERSION`, `version.properties`) |
+| Tags | `v0.1.1-beta0`, `v0.1.1-beta1`, `v0.7.0-rc0`, `v0.8.0-rc0` — all pre-release; no stable tag |
+| Android | `minSdk 24`, `targetSdk 37`, `compileSdk 37` (`build.gradle.kts:19,23-24`) |
+| Licence | Apache-2.0; bundled Shizuku API MIT; attribution in `NOTICE` |
+| Companion | `compat/` module, applicationId `moe.shizuku.privileged.api`, versionCode `700000` |
+| Files read | `build.gradle.kts`, `VERSION`, `version.properties`, `settings.gradle.kts`, `manager/build.gradle.kts`, `compat/build.gradle.kts`, `manager/src/main/AndroidManifest.xml`, `shell/.../PorterShellLoader.kt`, `server/.../PorterServer.kt`, `server/.../util/Android17Compat.kt`, `server/src/test/.../ServiceAuthorizationTest.kt`, `docs/*.md` |
+| Reliability | **L1** — source read directly |
+| Extends | **S-204**, which recorded this repository for a *negative* result only |
+| Evidence | P4-A01–A03, A07–A14, A18–A20, A24–A26, A33–A44, A94, A117–A118, P4-D01–D05, D07 |
+| Currency note | `main` HEAD **equals** Phase 2's S-204 pin, so P2-C05 ("Porter has no module subsystem") is re-verified at the same commit, not re-derived. HEAD is 3 days **after** tag `v0.8.0-rc0` |
+
+### S-302 — Porter SDK, pinned commit
+
+| Field | Value |
+| --- | --- |
+| Repository | `https://github.com/d4rken-org/porter-api` |
+| Commit | `2f2805226a33d6742c646a5efe022aa33d4c63ae` (2026-09-30) — **equals tag `0.9.0`** |
+| Local clone | `/tmp/porter-api`, detached HEAD at the pin |
+| Published as | `com.github.d4rken-org.porter-api` via JitPack; artifacts `sdk`, `sdk-extras`, `shizuku-compat`, `shizuku-bridge` |
+| Tags | `0.1.0`, `0.7.0`, `0.8.0`, `0.9.0` |
+| Modules | `aidl`, `shared`, `shizuku-compat`, `protocol`, `manager-protocol`, `sdk`, `sdk-extras`, `shizuku-bridge`, plus internal `porsh`, `server-shared` |
+| Wire versions | Porter protocol `VERSION 4` / `MIN_VERSION 4`; Shizuku `CLIENT_API_VERSION 13` / `MINIMUM 13` |
+| Android | SDK minSdk 24 (`docs/developers.md:40`) |
+| Files read | 30 Kotlin files under `sdk/`, `sdk-extras/`, `protocol/`, `shared/`, `server-shared/`; `docs/api-reference.md` (179 lines); `settings.gradle.kts` |
+| Reliability | **L1** — source read directly. `docs/api-reference.md` is rated **L1** because it ships inside the SDK repository and states the SDK's own contract, unlike the app's `docs/` site copy which is L2 |
+| Evidence | P4-A04–A06, A27–A32, A35–A38, A42, A45–A87, A89–A93, A98–A113, A116, A119–A138 |
+| Stability caveat | SDK is explicitly `0.x` and unstable (`docs/developers.md:364-374`). Every behavioural claim is pinned to `0.9.0`; see U-029 |
+
+### S-303 — `PorterCore`: the authorization gate lives in the SDK repository, not the application repository
+
+| Field | Value |
+| --- | --- |
+| Location | `porter-api/server-shared/src/main/java/eu/darken/porter/core/PorterCore.kt` (320 lines) plus `CallerExemption.kt`, `CallerIdentity.kt`, `ServerPolicy.kt`, `ServerProcess.kt`, `HostProcess.kt` |
+| Consumed by | `PORTER`'s `server` module, which depends on `:server-shared` (`server/build.gradle.kts:35`) and `includeSdkModule("server-shared")` (`settings.gradle.kts:71`) |
+| Why recorded separately | `eu.darken.porter.core.PorterCore` is **not present** in the `d4rken-org/porter` repository. A reader auditing only the application repo would find no permission-enforcement code at all and could wrongly conclude the boundary is undocumented. `grep -rn "class PorterCore"` over the app repo returns nothing |
+| Reliability | **L1** |
+| Evidence | P4-A08, A38–A41, A112–A113, P4-A94 |
+| Companion test | `PORTER server/src/test/java/eu/darken/porter/privileged/ServiceAuthorizationTest.kt` pins the gate, including the test named *"Holding the Android permission is what gets a binder delivered; it admits nothing by itself"* (P4-A112) and *"The manager is the user 0 installation; the same package in another user is an app"* (P4-A40) |
+
+### S-304 — Absence of a device or emulator as an experimental substrate
+
+| Field | Value |
+| --- | --- |
+| Type | Environment limitation, recorded so it is not mistaken for an omission |
+| Finding | No Android device, emulator, or instrumented-test run was available where Phase 4 was conducted |
+| Consequence | `INVESTIGATION_METHOD.md` §10 requires device, manufacturer/model, Android version, app version, dependency versions, backend, configuration, permissions, trust state, network state, battery state, procedure, expected result, observed result, logs and limitations for any experimental finding. None could be supplied, so **no experiment was performed** |
+| Affected | `PLAN.md` Phase 4 items 5 (supported Android versions) and 23 (Android-version-specific differences) — both recorded **partial**; and the bridge user-service claim (P4-A130), registered as U-025 |
+| Registered as | U-025, U-026, U-027, U-028 |
+| Reliability | L1 for the *absence*; **not** a source for any behavioural claim |
+
+### S-305 — Sources deliberately rejected in Phase 4
+
+| Field | Value |
+| --- | --- |
+| Rejected | `porter.run` and other deployment-platform results for "Porter" | 
+| Reason | `sources.md` hazard H-001: the name is overloaded. Phase 4 resolved the identity from the package id `eu.darken.porter` and the Shizuku-fork self-description, which no deployment platform matches. H-001 is now retired as a *naming* risk; the residual *stability* risk is U-029 |
+| Rejected | App-store mirrors (uptodown, apkmirror) and any repackaged Porter APK | 
+| Reason | Repackaged binaries of unverified provenance; weaker evidence than the public repository at a pinned commit. `SECURITY.md` exists in the repo precisely because APK authenticity is a stated concern |
+| Not used | Search-result snippets as evidence for any claim (`INVESTIGATION_METHOD.md` §6 — leads only) |
+| Not read | `compat/` companion internals, `manager/` UI, `probe/`, `fastlane/` metadata | 
+| Reason | Outside Phase 4's checklist. `compat/` is assigned a Phase 5/21 seam record (U-028); `manager/` UI is Phase 16 |
 
 
 ---
